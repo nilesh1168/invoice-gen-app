@@ -1,7 +1,8 @@
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/colors';
+import { Button } from '../components/ui/Button';
 
 export default function index() {
   return (
@@ -14,14 +15,13 @@ export default function index() {
       />
 
       {/* Button below the image */}
-      <TouchableOpacity style={styles.button}>
-        <Link href="/invoice/create" style={styles.buttonText}>
-          Get Started
-        </Link>
-      </TouchableOpacity>
-
+       <Button
+      title="Get Started"
+      onPress={() => router.push('/invoice/create')}
+      variant="primary"
+     />
       {/* Footer */}
-      <Text style={styles.footer}>© 2025 Nilesh Suryawanshi</Text>
+      {/* <Text style={styles.footer}>© 2025 Nilesh Suryawanshi</Text> */}
     </View>
   );
 }

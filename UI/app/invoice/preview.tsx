@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { Button } from '../../components/ui/Button';
@@ -8,6 +8,7 @@ import { useToast } from '../../hooks/useToast';
 import { Toast } from '../../components/ui/Toast';
 import { printToFileAsync } from 'expo-print';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
+const { width } = Dimensions.get('window');
 
 export default function PreviewInvoiceScreen() {
   const { invoiceData } = useLocalSearchParams();
@@ -19,26 +20,31 @@ export default function PreviewInvoiceScreen() {
     router.back();
   };
 
-  const handleSend = () => {
-    Alert.alert(
-      'Send Invoice',
-      `Send invoice to ${invoice.client?.email}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Send', 
-          onPress: () => {
-            // Here you would implement actual sending logic
-            showToast('Invoice sent successfully!', 'success');
-          }
-        },
-      ]
-    );
-  };
+  const handleSend = async () => {
+    const recipientEmail = invoice.client?.email;
 
-  const handleDownload = async () => {
-  const htmlContent = `
-<!DOCTYPE html>
+  if (!recipientEmail) {
+    Alert.alert('Missing Email', 'No client email found for this invoice.');
+    return;
+  }
+  Alert.alert(
+    'Send Invoice',
+    `Send invoice to ${invoice.client?.email}?`,
+    [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Send',
+        onPress: () => {
+          Alert.alert('Invoice Sent');
+        },
+      },
+    ]
+  );
+};
+
+  const generateInvoiceHTML = (invoice: Invoice) => {
+  return `
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -154,6 +160,21 @@ export default function PreviewInvoiceScreen() {
             margin: 25px 0;
         }
 
+        .billing-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .bill-to-section {
+            flex: 1;
+        }
+
+        .business-address-section {
+            flex: 1;
+            text-align: right;
+        }
+
         .client-info h4 {
             font-size: 16px;
             margin-bottom: 10px;
@@ -172,6 +193,10 @@ export default function PreviewInvoiceScreen() {
             font-weight: 600;
             font-size: 16px;
             margin-bottom: 5px;
+        }
+
+        .business-address-section .business-address {
+            text-align: right;
         }
 
         /* Body Component */
@@ -219,7 +244,6 @@ export default function PreviewInvoiceScreen() {
         }
 
         .totals-section {
-            border-top: 2px solid #2C3E50;
             padding-top: 20px;
         }
 
@@ -251,7 +275,6 @@ export default function PreviewInvoiceScreen() {
         .notes-section {
             margin-top: 40px;
             padding: 25px;
-            border: 2px solid #2C3E50;
         }
 
         .notes-section h4 {
@@ -335,16 +358,8 @@ export default function PreviewInvoiceScreen() {
                 border-bottom: 1px solid #000000 !important;
             }
             
-            .totals-section {
-                border-top: 2px solid #000000 !important;
-            }
-            
             .total-row.final-total {
                 border-top: 3px solid #000000 !important;
-            }
-            
-            .notes-section {
-                border: 2px solid #000000 !important;
             }
             
             .footer {
@@ -368,14 +383,6 @@ export default function PreviewInvoiceScreen() {
             <div class="header-top">
                 <div class="logo-section">
                     <div class="logo">IG</div>
-                    <div class="business-address">
-                        <h4>Business Address</h4>
-                        <div>123 Business Street</div>
-                        <div>Suite 456</div>
-                        <div>Business City, BC 12345</div>
-                        <div>Phone: (555) 123-4567</div>
-                        <div>Email: contact@business.com</div>
-                    </div>
                 </div>
                 <div class="invoice-details">
                      <div class="invoice-number">Invoice #${invoice.invoiceNumber}</div>
@@ -386,11 +393,22 @@ export default function PreviewInvoiceScreen() {
                 </div>
             </div>
             <div class="separator"></div>
-            <div class="client-info">
-                <h4>Bill To</h4>
-                <div class="client-details">
-                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 5px;">${invoice.client?.name}</div>
-                    <div>${invoice.client?.email}</div>
+            <div class="billing-section">
+                <div class="bill-to-section">
+                    <h4>Bill To</h4>
+                    <div class="client-details">
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 5px;">${invoice.client?.name}</div>
+                        <div>${invoice.client?.email}</div>
+                    </div>
+                </div>
+                <div class="business-address-section">
+                    <div class="business-address">
+                        <h4>Business Address</h4>
+                        <div>${invoice.businessInfo.name}</div>
+                        <div>${invoice.businessInfo.address}</div>
+                        <div>${invoice.businessInfo.phone}</div>
+                        <div>${invoice.businessInfo.email}</div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -425,11 +443,11 @@ export default function PreviewInvoiceScreen() {
                 </div>
                 <div class="total-row tax">
                     ${invoice.taxPercentage > 0 ? `<span>Tax (${invoice.taxPercentage}%)</span>
-                    <span>$${invoice.total.toFixed(2)}</span>` : ''}
+                    <span>$${invoice.taxAmount.toFixed(2)}</span>` : ''}
                 </div>
                 <div class="total-row final-total">
                     <span>Total Amount Due</span>
-                    <span>$9,548.00</span>
+                    <span>$${invoice.total.toFixed(2)}</span>
                 </div>
             </div>
 
@@ -453,6 +471,10 @@ export default function PreviewInvoiceScreen() {
 </body>
 </html>
   `;
+};
+
+  const handleDownload = async () => {
+  const htmlContent = generateInvoiceHTML(invoice)
 
   try {
     const { uri } = await printToFileAsync({ html: htmlContent, base64: false });
@@ -481,78 +503,130 @@ export default function PreviewInvoiceScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Invoice Preview</Text>
+<ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <View style={styles.invoiceContainer}>
+        {/* Header Component */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <View style={styles.logoSection}>
+              <View style={styles.logo}>
+                <Text style={styles.logoText}>IG</Text>
+              </View>
+            </View>
+            <View style={styles.invoiceDetails}>
+              <Text style={styles.invoiceNumber}>
+                Invoice #{invoice.invoiceNumber}
+              </Text>
+              <View style={styles.dateInfo}>
+                <Text style={styles.dateText}>
+                  <Text style={styles.dateLabel}>Date:</Text> {formatDate(invoice.invoiceDate)}
+                </Text>
+                <Text style={styles.dateText}>
+                  <Text style={styles.dateLabel}>Due:</Text> {formatDate(invoice.dueDate)}
+                </Text>
+              </View>
+            </View>
+          </View>
           
-          {/* Invoice Header */}
-          <View style={styles.invoiceContainer}>
-            <View style={styles.header}>
-              <View style={styles.businessInfo}>
-                <Text style={styles.businessName}>{invoice.businessInfo.name}</Text>
-                <Text style={styles.businessAddress}>{invoice.businessInfo.address}</Text>
-              </View>
-              <View style={styles.invoiceInfo}>
-                <Text style={styles.invoiceNumber}>Invoice #{invoice.invoiceNumber}</Text>
-                <Text style={styles.invoiceDate}>Date: {formatDate(invoice.invoiceDate)}</Text>
-                <Text style={styles.dueDate}>Due: {formatDate(invoice.dueDate)}</Text>
-              </View>
-            </View>
-
-            {/* Client Info */}
-            <View style={styles.clientSection}>
-              <Text style={styles.sectionTitle}>Bill To:</Text>
-              <Text style={styles.clientName}>{invoice.client?.name}</Text>
-              <Text style={styles.clientEmail}>{invoice.client?.email}</Text>
-            </View>
-
-            {/* Line Items */}
-            <View style={styles.itemsSection}>
-              <View style={styles.itemsHeader}>
-                <Text style={[styles.itemHeader, styles.descriptionHeader]}>Description</Text>
-                <Text style={[styles.itemHeader, styles.quantityHeader]}>Qty</Text>
-                <Text style={[styles.itemHeader, styles.priceHeader]}>Price</Text>
-                <Text style={[styles.itemHeader, styles.totalHeader]}>Total</Text>
-              </View>
-              
-              {invoice.lineItems.map((item) => (
-                <View key={item.id} style={styles.itemRow}>
-                  <Text style={[styles.itemText, styles.descriptionText]}>{item.description}</Text>
-                  <Text style={[styles.itemText, styles.quantityText]}>{item.quantity}</Text>
-                  <Text style={[styles.itemText, styles.priceText]}>${item.unitPrice.toFixed(2)}</Text>
-                  <Text style={[styles.itemText, styles.totalText]}>${item.total.toFixed(2)}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Totals */}
-            <View style={styles.totalsSection}>
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Subtotal:</Text>
-                <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
-              </View>
-              {invoice.taxPercentage > 0 && (
-                <View style={styles.totalRow}>
-                  <Text style={styles.totalLabel}>Tax ({invoice.taxPercentage}%):</Text>
-                  <Text style={styles.totalValue}>${invoice.taxAmount.toFixed(2)}</Text>
-                </View>
-              )}
-              <View style={[styles.totalRow, styles.finalTotalRow]}>
-                <Text style={styles.finalTotalLabel}>Total:</Text>
-                <Text style={styles.finalTotalValue}>${invoice.total.toFixed(2)}</Text>
+          <View style={styles.separator} />
+          
+          <View style={styles.billingSection}>
+            <View style={styles.billToSection}>
+              <Text style={styles.sectionTitle}>BILL TO</Text>
+              <View style={styles.clientDetails}>
+                <Text style={styles.clientName}>{invoice.client?.name}</Text>
+                <Text style={styles.clientText}>{invoice.client?.email}</Text>
+                {invoice.client?.address && (
+                  <Text style={styles.clientText}>{invoice.client?.address}</Text>
+                )}
               </View>
             </View>
-
-            {/* Notes */}
-            {invoice.notes && (
-              <View style={styles.notesSection}>
-                <Text style={styles.sectionTitle}>Notes:</Text>
-                <Text style={styles.notesText}>{invoice.notes}</Text>
-              </View>
-            )}
+            
+            <View style={styles.businessAddressSection}>
+              <Text style={styles.businessAddressTitle}>BUSINESS ADDRESS</Text>
+              <Text style={styles.businessAddressText}>{invoice.businessInfo.name}</Text>
+              <Text style={styles.businessAddressText}>{invoice.businessInfo.address}</Text>
+              <Text style={styles.businessAddressText}>{invoice.businessInfo.phone}</Text>
+              <Text style={styles.businessAddressText}>{invoice.businessInfo.email}</Text>
+            </View>
           </View>
         </View>
-      </ScrollView>
+
+        {/* Body Component */}
+        <View style={styles.body}>
+          {/* Invoice Table */}
+          <View style={styles.invoiceTable}>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.tableHeaderText, styles.descriptionHeader]}>
+                DESCRIPTION
+              </Text>
+              <Text style={[styles.tableHeaderText, styles.qtyHeader]}>
+                QTY
+              </Text>
+              <Text style={[styles.tableHeaderText, styles.priceHeader]}>
+                UNIT PRICE
+              </Text>
+              <Text style={[styles.tableHeaderText, styles.totalHeaderRight]}>
+                TOTAL
+              </Text>
+            </View>
+            
+            {invoice.lineItems.map((item, index) => (
+              <View key={index} style={styles.tableRow}>
+                <Text style={[styles.tableCell, styles.descriptionCell]}>
+                  {item.description}
+                </Text>
+                <Text style={[styles.tableCell, styles.qtyCell]}>
+                  {item.quantity}
+                </Text>
+                <Text style={[styles.tableCell, styles.priceCell]}>
+                  ${item.unitPrice.toFixed(2)}
+                </Text>
+                <Text style={[styles.tableCell, styles.totalCellRight]}>
+                  ${item.total.toFixed(2)}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Totals Section */}
+          <View style={styles.totalsSection}>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Subtotal</Text>
+              <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
+            </View>
+            
+            {invoice.taxPercentage > 0 && (
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Tax ({invoice.taxPercentage}%)</Text>
+                <Text style={styles.totalValue}>${invoice.taxAmount.toFixed(2)}</Text>
+              </View>
+            )}
+            
+            <View style={[styles.totalRow, styles.finalTotalRow]}>
+              <Text style={styles.finalTotalLabel}>TOTAL AMOUNT DUE</Text>
+              <Text style={styles.finalTotalValue}>${invoice.total.toFixed(2)}</Text>
+            </View>
+          </View>
+
+          {/* Notes Section */}
+          {invoice.notes && (
+            <View style={styles.notesSection}>
+              <Text style={styles.notesSectionTitle}>NOTES</Text>
+              <Text style={styles.notesContent}>{invoice.notes}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Footer Component */}
+        <View style={styles.footer}>
+          <View style={styles.footerContent}>
+            <Text style={styles.copyright}>© 2025</Text>
+            <Text style={styles.companyName}>INVOICEGEN</Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
@@ -572,6 +646,7 @@ export default function PreviewInvoiceScreen() {
           title="Send Invoice"
           onPress={handleSend}
           style={styles.button}
+          disabled={true}
         />
       </View>
 
@@ -584,190 +659,276 @@ export default function PreviewInvoiceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
   scrollView: {
+    backgroundColor: '#FFFFFF',
     flex: 1,
-  },
-  content: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-    marginBottom: 24,
   },
   invoiceContainer: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    width: Math.min(width - 40, 800),
+    alignSelf: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#2C3E50',
+    margin: 20,
   },
+  
+  // Header Styles
   header: {
+    padding: 40,
+    borderBottomWidth: 2,
+    borderBottomColor: '#2C3E50',
+  },
+  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 32,
+    alignItems: 'flex-start',
+    marginBottom: 30,
   },
-  businessInfo: {
+  logoSection: {
     flex: 1,
   },
-  businessName: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-    marginBottom: 8,
+  logo: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 3,
+    borderColor: '#2C3E50',
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
   },
-  businessAddress: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
+  logoText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2C3E50',
   },
-  invoiceInfo: {
+  invoiceDetails: {
+    flex: 1,
     alignItems: 'flex-end',
   },
   invoiceNumber: {
-    fontSize: 24,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+  },
+  dateInfo: {
+    alignItems: 'flex-end',
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#2C3E50',
+    marginBottom: 5,
+  },
+  dateLabel: {
     fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 8,
   },
-  invoiceDate: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 4,
+  separator: {
+    height: 1,
+    backgroundColor: '#2C3E50',
+    marginVertical: 25,
   },
-  dueDate: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+  billingSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-  clientSection: {
-    marginBottom: 32,
+  billToSection: {
+    flex: 1,
+  },
+  businessAddressSection: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 8,
+    fontWeight: '700',
+    color: '#2C3E50',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  clientDetails: {
+    marginTop: 0,
   },
   clientName: {
     fontSize: 16,
-    fontWeight: '500',
-    color: Colors.textPrimary,
-    marginBottom: 4,
-  },
-  clientEmail: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  itemsSection: {
-    marginBottom: 24,
-  },
-  itemsHeader: {
-    flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: Colors.primary,
-    paddingBottom: 12,
-    marginBottom: 16,
-  },
-  itemHeader: {
-    fontSize: 14,
     fontWeight: '600',
-    color: Colors.textPrimary,
+    color: '#2C3E50',
+    marginBottom: 5,
+  },
+  clientText: {
+    fontSize: 14,
+    color: '#2C3E50',
+    lineHeight: 21,
+  },
+  businessAddressTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2C3E50',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  businessAddressText: {
+    fontSize: 14,
+    color: '#2C3E50',
+    lineHeight: 21,
+    textAlign: 'right',
+  },
+  
+  // Body Styles
+  body: {
+    padding: 40,
+  },
+  invoiceTable: {
+    marginBottom: 30,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#2C3E50',
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+  },
+  tableHeaderText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   descriptionHeader: {
     flex: 3,
   },
-  quantityHeader: {
+  qtyHeader: {
     flex: 1,
     textAlign: 'center',
   },
   priceHeader: {
-    flex: 1,
+    flex: 1.5,
+    textAlign: 'center',
+  },
+  totalHeaderRight: {
+    flex: 1.5,
     textAlign: 'right',
   },
-  totalHeader: {
-    flex: 1,
-    textAlign: 'right',
-  },
-  itemRow: {
+  tableRow: {
     flexDirection: 'row',
-    paddingVertical: 12,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: '#2C3E50',
   },
-  itemText: {
+  tableCell: {
     fontSize: 14,
-    color: Colors.textPrimary,
+    color: '#2C3E50',
   },
-  descriptionText: {
+  descriptionCell: {
     flex: 3,
   },
-  quantityText: {
+  qtyCell: {
     flex: 1,
     textAlign: 'center',
   },
-  priceText: {
-    flex: 1,
+  priceCell: {
+    flex: 1.5,
+    textAlign: 'center',
+  },
+  totalCellRight: {
+    flex: 1.5,
     textAlign: 'right',
   },
-  totalText: {
-    flex: 1,
-    textAlign: 'right',
-    fontWeight: '500',
-  },
+  
+  // Totals Styles
   totalsSection: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    // borderTopWidth: 2,
+    // borderTopColor: '#2C3E50',
+    paddingTop: 20,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    paddingVertical: 10,
   },
   totalLabel: {
-    fontSize: 14,
-    color: Colors.textPrimary,
+    fontSize: 15,
+    color: '#2C3E50',
+    fontWeight: '500',
   },
   totalValue: {
-    fontSize: 14,
+    fontSize: 15,
+    color: '#2C3E50',
     fontWeight: '500',
-    color: Colors.textPrimary,
   },
   finalTotalRow: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: 8,
-    marginTop: 8,
+    borderTopWidth: 3,
+    borderTopColor: '#2C3E50',
+    paddingTop: 15,
+    marginTop: 15,
   },
   finalTotalLabel: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   finalTotalValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.primary,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2C3E50',
   },
+  
+  // Notes Styles
   notesSection: {
-    marginTop: 24,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    marginTop: 40,
+    paddingVertical: 25,
+    // borderWidth: 2,
+    // borderColor: '#2C3E50',
+    padding: 25,
   },
-  notesText: {
+  notesSectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2C3E50',
+    marginBottom: 15,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  notesContent: {
     fontSize: 14,
-    color: Colors.textSecondary,
-    lineHeight: 20,
+    color: '#2C3E50',
+    lineHeight: 22,
+  },
+  
+  // Footer Styles
+  footer: {
+    padding: 30,
+    borderTopWidth: 2,
+    borderTopColor: '#2C3E50',
+    alignItems: 'center',
+  },
+  footerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  copyright: {
+    fontSize: 14,
+    color: '#2C3E50',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  companyName: {
+    fontSize: 14,
+    color: '#2C3E50',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -781,4 +942,387 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
   },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
 });
+
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: Colors.background,
+//   },
+//   businessInfo: {
+//     flex: 1,
+//   },
+//   businessName: {
+//     fontSize: 20,
+//     fontWeight: '700',
+//     color: Colors.textPrimary,
+//     marginBottom: 8,
+//   },
+//   invoiceInfo: {
+//     alignItems: 'flex-end',
+//   },
+//   invoiceDate: {
+//     fontSize: 14,
+//     color: Colors.textSecondary,
+//     marginBottom: 4,
+//   },
+//   dueDate: {
+//     fontSize: 14,
+//     color: Colors.textSecondary,
+//   },
+//   clientSection: {
+//     marginBottom: 32,
+//   },
+//   clientEmail: {
+//     fontSize: 14,
+//     color: Colors.textSecondary,
+//   },
+//   itemsSection: {
+//     marginBottom: 24,
+//   },
+//   itemsHeader: {
+//     flexDirection: 'row',
+//     borderBottomWidth: 2,
+//     borderBottomColor: Colors.primary,
+//     paddingBottom: 12,
+//     marginBottom: 16,
+//   },
+//   itemHeader: {
+//     fontSize: 14,
+//     fontWeight: '600',
+//     color: Colors.textPrimary,
+//   },
+//   quantityHeader: {
+//     flex: 1,
+//     textAlign: 'center',
+//   },
+//   totalHeader: {
+//     flex: 1,
+//     textAlign: 'right',
+//   },
+//   itemRow: {
+//     flexDirection: 'row',
+//     paddingVertical: 12,
+//     borderBottomWidth: 1,
+//     borderBottomColor: Colors.border,
+//   },
+//   itemText: {
+//     fontSize: 14,
+//     color: Colors.textPrimary,
+//   },
+//   descriptionText: {
+//     flex: 3,
+//   },
+//   quantityText: {
+//     flex: 1,
+//     textAlign: 'center',
+//   },
+//   priceText: {
+//     flex: 1,
+//     textAlign: 'right',
+//   },
+//   totalText: {
+//     flex: 1,
+//     textAlign: 'right',
+//     fontWeight: '500',
+//   },
+//   notesText: {
+//     fontSize: 14,
+//     color: Colors.textSecondary,
+//     lineHeight: 20,
+//   },
+//   buttonContainer: {
+//     flexDirection: 'row',
+//     padding: 16,
+//     paddingTop: 8,
+//     gap: 8,
+//     borderTopWidth: 1,
+//     borderTopColor: Colors.border,
+//     backgroundColor: Colors.surface,
+//   },
+//   button: {
+//     flex: 1,
+//   },
+//   scrollView: {
+//     backgroundColor: '#FFFFFF',
+//   },
+//   content: {
+//     padding: 20,
+//     backgroundColor: '#FFFFFF',
+//   },
+//   title: {
+//     fontSize: 24,
+//     fontWeight: 'bold',
+//     color: '#2C3E50',
+//     marginBottom: 20,
+//     textAlign: 'center',
+//   },
+//   invoiceContainer: {
+//     backgroundColor: '#FFFFFF',
+//     borderWidth: 2,
+//     borderColor: '#2C3E50',
+//   },
+  
+//   // Header Styles
+//   header: {
+//     padding: 40,
+//     borderBottomWidth: 2,
+//     borderBottomColor: '#2C3E50',
+//   },
+//   headerTop: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'flex-start',
+//     marginBottom: 30,
+//   },
+//   logoSection: {
+//     flex: 1,
+//   },
+//   logo: {
+//     width: 60,
+//     height: 60,
+//     backgroundColor: '#FFFFFF',
+//     borderWidth: 3,
+//     borderColor: '#2C3E50',
+//     borderRadius: 30,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     marginBottom: 15,
+//   },
+//   logoText: {
+//     fontSize: 24,
+//     fontWeight: 'bold',
+//     color: '#2C3E50',
+//   },
+//   businessAddress: {
+//     marginTop: 0,
+//   },
+//   businessAddressTitle: {
+//     fontSize: 16,
+//     fontWeight: '700',
+//     color: '#2C3E50',
+//     marginBottom: 8,
+//     textTransform: 'uppercase',
+//     letterSpacing: 0.5,
+//   },
+//   businessAddressText: {
+//     fontSize: 14,
+//     color: '#2C3E50',
+//     lineHeight: 21,
+//   },
+//   invoiceDetails: {
+//     flex: 1,
+//     alignItems: 'flex-end',
+//   },
+//   invoiceNumber: {
+//     fontSize: 32,
+//     fontWeight: 'bold',
+//     color: '#2C3E50',
+//     marginBottom: 10,
+//     textTransform: 'uppercase',
+//   },
+//   dateInfo: {
+//     alignItems: 'flex-end',
+//   },
+//   dateText: {
+//     fontSize: 14,
+//     color: '#2C3E50',
+//     marginBottom: 5,
+//   },
+//   dateLabel: {
+//     fontWeight: '700',
+//   },
+//   separator: {
+//     height: 1,
+//     backgroundColor: '#2C3E50',
+//     marginVertical: 25,
+//   },
+//   clientInfo: {
+//     marginTop: 0,
+//   },
+//   sectionTitle: {
+//     fontSize: 16,
+//     fontWeight: '700',
+//     color: '#2C3E50',
+//     marginBottom: 10,
+//     textTransform: 'uppercase',
+//     letterSpacing: 0.5,
+//   },
+//   clientDetails: {
+//     marginTop: 0,
+//   },
+//   clientName: {
+//     fontSize: 16,
+//     fontWeight: '600',
+//     color: '#2C3E50',
+//     marginBottom: 5,
+//   },
+//   clientText: {
+//     fontSize: 14,
+//     color: '#2C3E50',
+//     lineHeight: 21,
+//   },
+  
+//   // Body Styles
+//   body: {
+//     padding: 40,
+//   },
+//   invoiceTable: {
+//     marginBottom: 30,
+//   },
+//   tableHeader: {
+//     flexDirection: 'row',
+//     backgroundColor: '#2C3E50',
+//     paddingVertical: 15,
+//     paddingHorizontal: 15,
+//   },
+//   tableHeaderText: {
+//     fontSize: 14,
+//     fontWeight: '700',
+//     color: '#FFFFFF',
+//     textTransform: 'uppercase',
+//     letterSpacing: 0.5,
+//   },
+//   descriptionHeader: {
+//     flex: 3,
+//   },
+//   qtyHeader: {
+//     flex: 1,
+//   },
+//   priceHeader: {
+//     flex: 1.5,
+//   },
+//   totalHeaderRight: {
+//     flex: 1.5,
+//     textAlign: 'right',
+//   },
+//   tableRow: {
+//     flexDirection: 'row',
+//     paddingVertical: 15,
+//     paddingHorizontal: 15,
+//     borderBottomWidth: 1,
+//     borderBottomColor: '#2C3E50',
+//   },
+//   tableCell: {
+//     fontSize: 14,
+//     color: '#2C3E50',
+//   },
+//   descriptionCell: {
+//     flex: 3,
+//   },
+//   qtyCell: {
+//     flex: 1,
+//   },
+//   priceCell: {
+//     flex: 1.5,
+//   },
+//   totalCellRight: {
+//     flex: 1.5,
+//     textAlign: 'right',
+//   },
+  
+//   // Totals Styles
+//   totalsSection: {
+//     borderTopWidth: 2,
+//     borderTopColor: '#2C3E50',
+//     paddingTop: 20,
+//   },
+//   totalRow: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     paddingVertical: 10,
+//   },
+//   totalLabel: {
+//     fontSize: 15,
+//     color: '#2C3E50',
+//     fontWeight: '500',
+//   },
+//   totalValue: {
+//     fontSize: 15,
+//     color: '#2C3E50',
+//     fontWeight: '500',
+//   },
+//   finalTotalRow: {
+//     borderTopWidth: 3,
+//     borderTopColor: '#2C3E50',
+//     paddingTop: 15,
+//     marginTop: 15,
+//   },
+//   finalTotalLabel: {
+//     fontSize: 20,
+//     fontWeight: 'bold',
+//     color: '#2C3E50',
+//     textTransform: 'uppercase',
+//     letterSpacing: 0.5,
+//   },
+//   finalTotalValue: {
+//     fontSize: 20,
+//     fontWeight: 'bold',
+//     color: '#2C3E50',
+//   },
+  
+//   // Notes Styles
+//   notesSection: {
+//     marginTop: 40,
+//     paddingVertical: 25,
+//   },
+//   notesSectionTitle: {
+//     fontSize: 16,
+//     fontWeight: '700',
+//     color: '#2C3E50',
+//     marginBottom: 15,
+//     textTransform: 'uppercase',
+//     letterSpacing: 0.5,
+//   },
+//   notesContent: {
+//     fontSize: 14,
+//     color: '#2C3E50',
+//     lineHeight: 22,
+//   },
+  
+//   // Footer Styles
+//   footer: {
+//     padding: 30,
+//     borderTopWidth: 2,
+//     borderTopColor: '#2C3E50',
+//     alignItems: 'center',
+//   },
+//   footerContent: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     gap: 8,
+//   },
+//   copyright: {
+//     fontSize: 14,
+//     color: '#2C3E50',
+//     fontWeight: '600',
+//     textTransform: 'uppercase',
+//     letterSpacing: 0.5,
+//   },
+//   companyName: {
+//     fontSize: 14,
+//     color: '#2C3E50',
+//     fontWeight: '700',
+//     textTransform: 'uppercase',
+//     letterSpacing: 0.5,
+//   },
+//   billingSection: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'flex-start',
+//     marginTop: 0,
+//   },
+//   billToSection: {
+//     flex: 1,
+//   },
+//   businessAddressSection: {
+//     flex: 1,
+//     alignItems: 'flex-end',
+//   },
+// });
