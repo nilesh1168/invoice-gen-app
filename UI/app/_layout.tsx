@@ -5,7 +5,7 @@ import { Colors } from '../constants/colors';
 export default function RootLayout() {
   return (
     <>
-      <StatusBar style="dark" backgroundColor={Colors.background} />
+      {/* <StatusBar style="dark" backgroundColor={Colors.background} /> */}
       <Stack
         screenOptions={{
           headerStyle: {
@@ -18,6 +18,13 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen 
+          name="index" 
+          options={{ 
+            title: 'Home',
+            headerShown: true,
+          }} 
+        />
+        <Stack.Screen 
           name="invoice/create" 
           options={{ 
             title: 'Create Invoice',
@@ -28,13 +35,6 @@ export default function RootLayout() {
           name="invoice/preview" 
           options={{ 
             title: 'Preview Invoice',
-            headerShown: true,
-          }} 
-        />
-        <Stack.Screen 
-          name="index" 
-          options={{ 
-            title: 'Home',
             headerShown: true,
           }} 
         />
