@@ -1,29 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LineItem } from '../../constants/types';
 import { Colors } from '../../constants/colors';
-import { Button } from '../ui/Button';
 import { TextInput } from '../ui/TextInput';
 
-interface LineItemListProps {
-  lineItems: LineItem[];
-  onAddItem: () => void;
-  onRemoveItem: (id: string) => void;
-  onUpdateItem: (id: string, updates: Partial<LineItem>) => void;
+interface LineItemInputProps {
+  item: LineItem;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, updates: Partial<LineItem>) => void;
 }
 
-export const LineItemList: React.FC<LineItemListProps> = ({
-  lineItems,
-  onAddItem,
-  onRemoveItem,
-  onUpdateItem,
-}) => {
-  const renderLineItem = ({ item }: { item: LineItem }) => (
+export const LineItemInput: React.FC<LineItemInputProps> = ({ item, onRemove, onUpdate }) => {
+  return (
     <View style={styles.lineItem}>
       <TextInput
         label="Description"
         value={item.description}
-        onChangeText={(text) => onUpdateItem(item.id, { description: text })}
+        onChangeText={(text) => onUpdate(item.id, { description: text })}
         placeholder="Item description"
         required
       />
@@ -31,7 +24,7 @@ export const LineItemList: React.FC<LineItemListProps> = ({
         <TextInput
           label="Quantity"
           value={item.quantity.toString()}
-          onChangeText={(text) => onUpdateItem(item.id, { quantity: Number(text) || 0 })}
+          onChangeText={(text) => onUpdate(item.id, { quantity: Number(text) || 0 })}
           keyboardType="numeric"
           style={styles.quantityInput}
           required
@@ -39,7 +32,7 @@ export const LineItemList: React.FC<LineItemListProps> = ({
         <TextInput
           label="Unit Price"
           value={item.unitPrice.toString()}
-          onChangeText={(text) => onUpdateItem(item.id, { unitPrice: Number(text) || 0 })}
+          onChangeText={(text) => onUpdate(item.id, { unitPrice: Number(text) || 0 })}
           keyboardType="numeric"
           style={styles.priceInput}
           required
@@ -49,48 +42,14 @@ export const LineItemList: React.FC<LineItemListProps> = ({
           <Text style={styles.totalValue}>${item.total.toFixed(2)}</Text>
         </View>
       </View>
-      <TouchableOpacity
-        style={styles.removeButton}
-        onPress={() => onRemoveItem(item.id)}
-      >
+      <TouchableOpacity style={styles.removeButton} onPress={() => onRemove(item.id)}>
         <Text style={styles.removeButtonText}>Remove</Text>
       </TouchableOpacity>
-    </View>
-  );
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Line Items</Text>
-      <FlatList
-        data={lineItems}
-        renderItem={renderLineItem}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-        // scrollEnabled={false}
-      />
-      <Button
-        title="+ Add Item"
-        onPress={onAddItem}
-        variant="outline"
-        style={styles.addButton}
-      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 16,
-  },
-  list: {
-    maxHeight: 400,
-  },
   lineItem: {
     backgroundColor: Colors.surface,
     padding: 16,
@@ -133,8 +92,5 @@ const styles = StyleSheet.create({
     color: Colors.error,
     fontSize: 14,
     fontWeight: '500',
-  },
-  addButton: {
-    marginTop: 8,
   },
 });
