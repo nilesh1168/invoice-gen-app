@@ -1,5 +1,6 @@
 {
   "expo": {
+    "entryPoint": "./index.tsx",
     "scheme":"invoiceGen", 
     "name": "UI",
     "slug": "UI",
