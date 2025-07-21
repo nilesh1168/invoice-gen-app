@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, Alert } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Alert, FlatList } from 'react-native';
 import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { Button } from '../../components/ui/Button';
 import { TextInput } from '../../components/ui/TextInput';
 import { DatePicker } from '../../components/ui/DatePicker';
-import { LineItemList } from '../../components/invoice/LineItemList';
+import { LineItemInput } from '../../components/invoice/LineItemInput';
 import { useInvoice } from '../../hooks/useInvoice';
 import { useToast } from '../../hooks/useToast';
 import { validateInvoice } from '../../utils/validation';
 import { Toast } from '../../components/ui/Toast';
+import AdvancedAdaptiveContainer from '../../components/ui/Container';
+import { LineItem } from '../../constants/types';
 
 export default function CreateInvoiceScreen() {
   const {
@@ -34,7 +36,7 @@ export default function CreateInvoiceScreen() {
       showToast(errors[0], 'error');
       return;
     }
-    
+
     router.push({
       pathname: '/invoice/preview',
       params: { invoiceData: JSON.stringify(invoice) },
@@ -57,13 +59,18 @@ export default function CreateInvoiceScreen() {
     );
   };
 
+  const renderLineItem = ({ item }: { item: LineItem }) => (
+    <LineItemInput
+      item={item}
+      onUpdate={updateLineItem}
+      onRemove={removeLineItem}
+    />
+  );
+
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Create Invoice</Text>
-          
-          {/* Business Information */}
+    <AdvancedAdaptiveContainer excludeTopInset={true} backgroundColor={Colors.background}>
+      <FlatList style={[styles.scrollView, styles.content]} data={invoice.lineItems} renderItem={renderLineItem}
+        ListHeaderComponent={
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Business Information</Text>
             <TextInput
@@ -85,10 +92,7 @@ export default function CreateInvoiceScreen() {
               multiline
               numberOfLines={3}
             />
-          </View>
 
-          {/* Client Information */}
-          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Client Information</Text>
             <TextInput
               label="Client Name"
@@ -109,10 +113,7 @@ export default function CreateInvoiceScreen() {
               keyboardType="email-address"
               required
             />
-          </View>
-
-          {/* Invoice Details */}
-          <View style={styles.section}>
+            {/* <View style={styles.section}> */}
             <Text style={styles.sectionTitle}>Invoice Details</Text>
             <TextInput
               label="Invoice Number"
@@ -133,56 +134,59 @@ export default function CreateInvoiceScreen() {
               onChange={(date) => updateInvoice({ dueDate: date })}
               required
             />
+            <Text style={styles.title}>Line Items</Text>
+            {/* </View> */}
           </View>
-
-          {/* Line Items */}
-          <LineItemList
-            lineItems={invoice.lineItems}
-            onAddItem={addLineItem}
-            onRemoveItem={removeLineItem}
-            onUpdateItem={updateLineItem}
-          />
-
-          {/* Tax and Totals */}
+        }
+        ListFooterComponent={
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tax & Totals</Text>
-            <TextInput
-              label="Tax Percentage"
-              value={invoice.taxPercentage.toString()}
-              onChangeText={(text) => updateInvoice({ taxPercentage: Number(text) || 0 })}
-              keyboardType="numeric"
-              placeholder="0"
-            />
-            
-            <View style={styles.totalsContainer}>
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Subtotal:</Text>
-                <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
-              </View>
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Tax ({invoice.taxPercentage}%):</Text>
-                <Text style={styles.totalValue}>${invoice.taxAmount.toFixed(2)}</Text>
-              </View>
-              <View style={[styles.totalRow, styles.finalTotal]}>
-                <Text style={styles.finalTotalLabel}>Total:</Text>
-                <Text style={styles.finalTotalValue}>${invoice.total.toFixed(2)}</Text>
+            <View style={styles.section}>
+              <Button
+              title="+ Add Item"
+              onPress={addLineItem}
+              variant="outline"
+              style={styles.addButton}
+              />
+            </View>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Tax & Totals</Text>
+              <TextInput
+                label="Tax Percentage"
+                value={invoice.taxPercentage.toString()}
+                onChangeText={(text) => updateInvoice({ taxPercentage: Number(text) || 0 })}
+                keyboardType="numeric"
+                placeholder="0"
+              />
+
+              <View style={styles.totalsContainer}>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Subtotal:</Text>
+                  <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
+                </View>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Tax ({invoice.taxPercentage}%):</Text>
+                  <Text style={styles.totalValue}>${invoice.taxAmount.toFixed(2)}</Text>
+                </View>
+                <View style={[styles.totalRow, styles.finalTotal]}>
+                  <Text style={styles.finalTotalLabel}>Total:</Text>
+                  <Text style={styles.finalTotalValue}>${invoice.total.toFixed(2)}</Text>
+                </View>
               </View>
             </View>
+            <View style={styles.section}>
+              <TextInput
+                label="Notes / Terms"
+                value={invoice.notes}
+                onChangeText={(text) => updateInvoice({ notes: text })}
+                placeholder="Payment terms, additional notes..."
+                multiline
+                numberOfLines={4}
+              />
+            </View>
           </View>
-
-          {/* Notes */}
-          <View style={styles.section}>
-            <TextInput
-              label="Notes / Terms"
-              value={invoice.notes}
-              onChangeText={(text) => updateInvoice({ notes: text })}
-              placeholder="Payment terms, additional notes..."
-              multiline
-              numberOfLines={4}
-            />
-          </View>
-        </View>
-      </ScrollView>
+        }
+      >
+      </FlatList>
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
@@ -209,7 +213,8 @@ export default function CreateInvoiceScreen() {
       {toasts.map((toast) => (
         <Toast key={toast.id} toast={toast} onHide={hideToast} />
       ))}
-    </View>
+      {/* </View> */}
+    </AdvancedAdaptiveContainer>
   );
 }
 
@@ -286,5 +291,8 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
+  },
+  addButton: {
+    marginTop: 0,
   },
 });
