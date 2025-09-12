@@ -1,27 +1,35 @@
-import { router } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import React, { use, useEffect } from 'react';
+import { StyleSheet, Text, View, Image, Alert, Platform } from 'react-native';
 import { Colors } from '../constants/colors';
 import { Button } from '../components/ui/Button';
+import { useGoogleAuth } from '../hooks/useGoogleAuth';
+
 
 export default function index() {
+  const { signInWithGoogle, loading} = useGoogleAuth();
+
   return (
     <View style={styles.container}>
       {/* Image in the center */}
       <Image
-        source={require('../assets/invoicegen.png')} 
+        source={require('../assets/invoicegen.png')}
         style={styles.image}
         resizeMode="contain"
       />
+      <Text style={styles.subtitle}>Invoicing, Simplified.</Text>
 
-      {/* Button below the image */}
-       <Button
-      title="Get Started"
-      onPress={() => router.push('/invoice/create')}
-      variant="primary"
-     />
-      {/* Footer */}
-      {/* <Text style={styles.footer}>© 2025 Nilesh Suryawanshi</Text> */}
+      {/* Sign-in buttons */}
+      <View style={styles.buttonContainer}>
+
+        <Button
+          title="Sign in with Google"
+          onPress={signInWithGoogle}
+          variant="outline"
+          disabled={loading}
+          style={styles.button}
+        />
+
+      </View>
     </View>
   );
 }
@@ -29,7 +37,7 @@ export default function index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background, // Ivory background
+    backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -37,24 +45,29 @@ const styles = StyleSheet.create({
   image: {
     width: 250,
     height: 250,
+    marginBottom: 1,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: Colors.textSecondary,
     marginBottom: 40,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 16,
+    maxWidth: 300,
   },
   button: {
-    backgroundColor: Colors.primary, // Mint Green (Primary)
-    paddingVertical: 15,
-    paddingHorizontal: 50,
-    borderRadius: 10,
-    marginBottom: 40,
+    width: '100%',
   },
-  buttonText: {
-    color: Colors.surface, // White text
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 20,
-    color: Colors.textSecondary, // Slate Gray
-    fontSize: 14,
+  loadingText: {
+    fontSize: 16,
+    color: Colors.textSecondary,
   },
 });

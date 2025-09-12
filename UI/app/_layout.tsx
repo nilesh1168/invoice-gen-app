@@ -4,8 +4,7 @@ import { Colors } from '../constants/colors';
 
 export default function RootLayout() {
   return (
-    <>
-      {/* <StatusBar style="dark" backgroundColor={Colors.background} /> */}
+      // <StatusBar style="dark" backgroundColor={Colors.background} />
       <Stack
         screenOptions={{
           headerStyle: {
@@ -39,6 +38,5 @@ export default function RootLayout() {
           }} 
         />
       </Stack>
-    </>
   );
 }
