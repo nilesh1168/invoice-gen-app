@@ -1,9 +1,9 @@
-import React, { use, useEffect } from 'react';
+import '../utils/font_awesome'; // <-- Add this line at the top
+import React from 'react';
 import { StyleSheet, Text, View, Image, Alert, Platform } from 'react-native';
 import { Colors } from '../constants/colors';
 import { Button } from '../components/ui/Button';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
-
 
 export default function index() {
   const { signInWithGoogle, loading} = useGoogleAuth();
@@ -20,7 +20,6 @@ export default function index() {
 
       {/* Sign-in buttons */}
       <View style={styles.buttonContainer}>
-
         <Button
           title="Sign in with Google"
           onPress={signInWithGoogle}
