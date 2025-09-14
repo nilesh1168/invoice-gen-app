@@ -12,7 +12,6 @@ import { validateInvoice } from '../../utils/validation';
 import { Toast } from '../../components/ui/Toast';
 import AdvancedAdaptiveContainer from '../../components/ui/Container';
 import { LineItem } from '../../constants/types';
-
 export default function CreateInvoiceScreen() {
   const {
     invoice,
@@ -29,6 +28,7 @@ export default function CreateInvoiceScreen() {
   useEffect(() => {
     recalculateInvoice();
   }, [invoice.lineItems, invoice.taxPercentage]);
+
 
   const handlePreview = () => {
     const errors = validateInvoice(invoice);
@@ -142,10 +142,10 @@ export default function CreateInvoiceScreen() {
           <View style={styles.section}>
             <View style={styles.section}>
               <Button
-              title="+ Add Item"
-              onPress={addLineItem}
-              variant="outline"
-              style={styles.addButton}
+                title="+ Add Item"
+                onPress={addLineItem}
+                variant="outline"
+                style={styles.addButton}
               />
             </View>
             <View style={styles.section}>
