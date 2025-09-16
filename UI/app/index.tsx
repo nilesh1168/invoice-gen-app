@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, Image, Alert, Platform } from 'react-native';
 import { Colors } from '../constants/colors';
 import { Button } from '../components/ui/Button';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
+import { router } from 'expo-router';
 
 export default function index() {
   const { signInWithGoogle, loading} = useGoogleAuth();
@@ -22,6 +23,7 @@ export default function index() {
       <View style={styles.buttonContainer}>
         <Button
           title="Sign in with Google"
+          // onPress={() => {router.push('/invoice/create')}}
           onPress={signInWithGoogle}
           variant="outline"
           disabled={loading}

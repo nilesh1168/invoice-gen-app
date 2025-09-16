@@ -52,12 +52,10 @@ export default function PreviewInvoiceScreen() {
     try {
       const { uri } = await printToFileAsync({ html: htmlContent, base64: false });
 
-      showToast('Invoice downloaded!', 'success');
-
       if (await isAvailableAsync()) {
         await shareAsync(uri);
       } else {
-        Alert.alert('PDF Generated', `File saved at: ${uri}`);
+        showToast(`PDF generated: File saved at ${uri}`, 'success');
       }
     } catch (err) {
       console.error(err);

@@ -66,7 +66,7 @@ const generateInvoiceHTML = (invoice: Invoice) => {
     // TODO: create a string of html with first 8 lineitems
     let firstPageItems = invoice.lineItems.slice(0, 8);
     let firstPage = `
-    <div class="first-page">
+    <div class="invoice-page">
     ${renderHeader()}
     <main class="body">
       <table class="invoice-table">
@@ -122,10 +122,9 @@ const generateInvoiceHTML = (invoice: Invoice) => {
     }
 
     let bodyPagesHtml = '';
-    // add page break after each page except last
     pages.forEach((pageItems, pageIndex) => {
         bodyPagesHtml += `
-      <div class="invoice-page page">
+      <div class="invoice-page">
         ${renderHeader(false)}
         <main class="body">
           <table class="invoice-table">
@@ -183,11 +182,6 @@ const generateInvoiceHTML = (invoice: Invoice) => {
     <meta name="viewport" content="width=1024, initial-scale=1.0, user-scalable=yes">
     <title>Invoice Template</title>
     <style>
-        .first-page{
-         min-height: 1250px; 
-        border: 2px solid #2C3E50;
-        position: relative;
-        }
           .invoice-page {
         min-height: 1250px; 
         border: 2px solid #2C3E50;
@@ -198,9 +192,6 @@ const generateInvoiceHTML = (invoice: Invoice) => {
             size: A4 portrait;
             margin: 0;
         }
-            .page:not(:first-of-type) {
-      margin-top: 20px; /* Specific margin for pages from second onwards */
-    }
 
         * {
             margin: 0;
