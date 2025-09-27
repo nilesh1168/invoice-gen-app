@@ -1,4 +1,4 @@
-package com.invoicegen.UI
+package com.android.invoicegen.UI
 
 import android.app.Application
 import android.content.res.Configuration

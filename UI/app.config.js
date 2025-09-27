@@ -16,26 +16,38 @@ export default {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.invoicegen.UI"
+      bundleIdentifier: "com.ios.invoicegen.UI",
+      googleServicesFile: "./GoogleService-Info.plist"
     },
     android: {
+      googleServicesFile: "./google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
       edgeToEdgeEnabled: true,
-      package: "com.invoicegen.UI"
+      package: "com.android.invoicegen.UI"
     },
     web: {
       favicon: "./assets/favicon.png"
     },
     plugins: [
       "expo-router",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
       [
         "@react-native-google-signin/google-signin",
         {
           iosUrlScheme: process.env.EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME
-        }
+        },
       ]
     ]
   }

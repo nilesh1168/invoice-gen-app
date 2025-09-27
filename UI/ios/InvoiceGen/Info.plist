@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>invoiceGen</string>
-          <string>com.invoicegen.UI</string>
+          <string>com.ios.invoicegen.UI</string>
         </array>
       </dict>
       <dict>
