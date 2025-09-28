@@ -30,13 +30,7 @@ export default {
       favicon: "./assets/favicon.png"
     },
     plugins: [
-      "expo-router",
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          iosUrlScheme: process.env.EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME
-        }
-      ]
+      "expo-router"
     ]
   }
 };
