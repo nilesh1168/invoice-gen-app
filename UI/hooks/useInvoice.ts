@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Invoice, LineItem, Client, BusinessInfo } from '../constants/types';
+import { Invoice, LineItem} from '../constants/types';
 import { calculateLineItemTotal, calculateSubtotal, calculateTaxAmount, calculateTotal } from '../utils/calculations';
 
 export const useInvoice = () => {
   const [invoice, setInvoice] = useState<Invoice>({
     id: Date.now().toString(),
     invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
-    client: null,
+    client: {
+      name: '',
+      email: '',
+    },
     businessInfo: {
       name: '',
       address: '',
@@ -20,8 +23,7 @@ export const useInvoice = () => {
     notes: '',
     subtotal: 0,
     taxAmount: 0,
-    total: 0,
-    isDraft: true,
+    total: 0
   });
 
   const updateInvoice = (updates: Partial<Invoice>) => {
@@ -94,8 +96,7 @@ export const useInvoice = () => {
       notes: '',
       subtotal: 0,
       taxAmount: 0,
-      total: 0,
-      isDraft: true,
+      total: 0
     });
   };
 
