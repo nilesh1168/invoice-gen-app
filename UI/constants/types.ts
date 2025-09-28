@@ -7,7 +7,6 @@ export interface LineItem {
 }
 
 export interface Client {
-  id: string;
   name: string;
   email: string;
   address?: string;
@@ -34,5 +33,4 @@ export interface Invoice {
   subtotal: number;
   taxAmount: number;
   total: number;
-  isDraft: boolean;
 }
