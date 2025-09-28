@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { View, StyleSheet, Alert, Dimensions } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { Button } from '../../components/ui/Button';
 import { Invoice } from '../../constants/types';
@@ -8,7 +7,6 @@ import { useToast } from '../../hooks/useToast';
 import { Toast } from '../../components/ui/Toast';
 import { printToFileAsync } from 'expo-print';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
-import AdvancedAdaptiveContainer from '../../components/ui/Container';
 import { WebView } from 'react-native-webview';
 import { generateInvoiceHTML } from '../../utils/pdf_utils';
 const { width } = Dimensions.get('window');
@@ -19,30 +17,8 @@ export default function PreviewInvoiceScreen() {
 
   const invoice: Invoice = JSON.parse(invoiceData as string);
 
-  const handleEdit = () => {
-    router.back();
-  };
-
   const handleSend = async () => {
-    const recipientEmail = invoice.client?.email;
-
-    if (!recipientEmail) {
-      Alert.alert('Missing Email', 'No client email found for this invoice.');
-      return;
-    }
-    Alert.alert(
-      'Send Invoice',
-      `Send invoice to ${invoice.client?.email}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Send',
-          onPress: () => {
-            Alert.alert('Invoice Sent');
-          },
-        },
-      ]
-    );
+    // TODO: Implement email sending functionality
   };
 
   // Handle PDF generation and sharing
@@ -53,20 +29,23 @@ export default function PreviewInvoiceScreen() {
       const { uri } = await printToFileAsync({ html: htmlContent, base64: false });
 
       if (await isAvailableAsync()) {
-        await shareAsync(uri);
+        await shareAsync(uri).then(() => {
+            Alert.alert('Success', 'Invoice downloaded successfully');
+        })
       } else {
-        showToast(`PDF generated: File saved at ${uri}`, 'success');
+        // File shared at a temperary location, you might want to move it to a permanent location
+        showToast(`Invoice generated: Invoice saved at ${uri}`, 'success');
       }
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'Could not generate PDF');
+      Alert.alert('Error', 'Could not generate Invoice');
     }
   };
 
 
 
   return (
-    <AdvancedAdaptiveContainer excludeTopInset={true}>
+    <>
       <WebView
         originWhitelist={['*']}
         source={{ html: generateInvoiceHTML(invoice) }}
@@ -75,12 +54,6 @@ export default function PreviewInvoiceScreen() {
         scalesPageToFit={true}
       />
       <View style={styles.buttonContainer}>
-        <Button
-          title="Edit Invoice"
-          onPress={handleEdit}
-          variant="outline"
-          style={styles.button}
-        />
         <Button
           title="Download"
           onPress={handleDownload}
@@ -99,7 +72,7 @@ export default function PreviewInvoiceScreen() {
       {toasts.map((toast) => (
         <Toast key={toast.id} toast={toast} onHide={hideToast} />
       ))}
-    </AdvancedAdaptiveContainer>
+      </>
   );
 }
 

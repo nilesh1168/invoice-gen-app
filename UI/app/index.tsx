@@ -1,14 +1,10 @@
-import '../utils/font_awesome'; // <-- Add this line at the top
 import React from 'react';
-import { StyleSheet, Text, View, Image, Alert, Platform } from 'react-native';
+import { StyleSheet, Text, View, Image} from 'react-native';
 import { Colors } from '../constants/colors';
 import { Button } from '../components/ui/Button';
-import { useGoogleAuth } from '../hooks/useGoogleAuth';
 import { router } from 'expo-router';
 
 export default function index() {
-  const { signInWithGoogle, loading} = useGoogleAuth();
-
   return (
     <View style={styles.container}>
       {/* Image in the center */}
@@ -22,14 +18,11 @@ export default function index() {
       {/* Sign-in buttons */}
       <View style={styles.buttonContainer}>
         <Button
-          title="Sign in with Google"
-          // onPress={() => {router.push('/invoice/create')}}
-          onPress={signInWithGoogle}
+          title="Get Started"
+          onPress={() => {router.push('/invoice/create')}}
           variant="outline"
-          disabled={loading}
           style={styles.button}
         />
-
       </View>
     </View>
   );
