@@ -1,6 +1,15 @@
 import { Stack } from 'expo-router';
 import { Colors } from '../constants/colors';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import SplashScreen from 'expo-splash-screen';
+
+// keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
+
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+});
 
 export default function RootLayout() {
   return (

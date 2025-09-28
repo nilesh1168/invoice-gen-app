@@ -6,21 +6,20 @@ export default {
     slug: "InvoiceGen",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/icon.png",
-    userInterfaceStyle: "light",
     newArchEnabled: true,
-    splash: {
-      image: "./assets/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#ffffff"
-    },
     ios: {
+      icon:{
+        dark: "./assets/ios-dark.png",
+        light: "./assets/ios-light.png",
+        tinted: "./assets/ios-tinted.png"
+      },
       supportsTablet: true,
       bundleIdentifier: "com.invoicegen.UI"
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
+        monochromeImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
       edgeToEdgeEnabled: true,
@@ -30,7 +29,20 @@ export default {
       favicon: "./assets/favicon.png"
     },
     plugins: [
-      "expo-router"
+      "expo-router",
+      [
+        'expo-splash-screen',
+        {
+          image: './assets/splash-icon-dark.png',
+          dark: {
+            image: "./assets/splash-icon-light.png",
+            backgroundColor: "#000000"
+          },
+          imageWidth: 200,
+          resizeMode: 'contain',
+          backgroundColor: '#ffffff'
+        }
+      ]
     ]
   }
 };
