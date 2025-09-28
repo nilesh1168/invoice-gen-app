@@ -1,10 +1,10 @@
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { Colors } from '../constants/colors';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 export default function RootLayout() {
   return (
-      // <StatusBar style="dark" backgroundColor={Colors.background} />
+    <KeyboardProvider>
       <Stack
         screenOptions={{
           headerStyle: {
@@ -20,23 +20,24 @@ export default function RootLayout() {
           name="index" 
           options={{ 
             title: 'Home',
-            headerShown: true,
+            headerShown: false,
           }} 
         />
         <Stack.Screen 
           name="invoice/create" 
           options={{ 
             title: 'Create Invoice',
-            headerShown: true,
+            headerShown: false,
           }} 
         />
         <Stack.Screen 
           name="invoice/preview" 
           options={{ 
             title: 'Preview Invoice',
-            headerShown: true,
+            headerShown: false,
           }} 
         />
       </Stack>
-  );
+    </KeyboardProvider>
+  );  
 }

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, Alert, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Alert, FlatList, Keyboard } from 'react-native';
 import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { Button } from '../../components/ui/Button';
@@ -10,8 +10,11 @@ import { useInvoice } from '../../hooks/useInvoice';
 import { useToast } from '../../hooks/useToast';
 import { validateInvoice } from '../../utils/validation';
 import { Toast } from '../../components/ui/Toast';
-import AdvancedAdaptiveContainer from '../../components/ui/Container';
 import { LineItem } from '../../constants/types';
+import { Container } from '../../components/ui/Container';
+import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 export default function CreateInvoiceScreen() {
   const {
     invoice,
@@ -23,12 +26,12 @@ export default function CreateInvoiceScreen() {
     resetInvoice,
   } = useInvoice();
 
+  const insets = useSafeAreaInsets();
   const { toasts, showToast, hideToast } = useToast();
 
   useEffect(() => {
     recalculateInvoice();
   }, [invoice.lineItems, invoice.taxPercentage]);
-
 
   const handlePreview = () => {
     const errors = validateInvoice(invoice);
@@ -41,11 +44,6 @@ export default function CreateInvoiceScreen() {
       pathname: '/invoice/preview',
       params: { invoiceData: JSON.stringify(invoice) },
     });
-  };
-
-  const handleSaveDraft = () => {
-    updateInvoice({ isDraft: true });
-    showToast('Draft saved successfully', 'success');
   };
 
   const handleCancel = () => {
@@ -67,167 +65,166 @@ export default function CreateInvoiceScreen() {
     />
   );
 
+  const bottomOffset = insets.bottom + 62;
+  
   return (
-    <AdvancedAdaptiveContainer excludeTopInset={true} backgroundColor={Colors.background}>
-      <FlatList style={[styles.scrollView, styles.content]} data={invoice.lineItems} renderItem={renderLineItem}
-        ListHeaderComponent={
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Business Information</Text>
-            <TextInput
-              label="Business Name"
-              value={invoice.businessInfo.name}
-              onChangeText={(text) => updateInvoice({
-                businessInfo: { ...invoice.businessInfo, name: text }
-              })}
-              placeholder="Your business name"
-              required
-            />
-            <TextInput
-              label="Address"
-              value={invoice.businessInfo.address}
-              onChangeText={(text) => updateInvoice({
-                businessInfo: { ...invoice.businessInfo, address: text }
-              })}
-              placeholder="Business address"
-              multiline
-              numberOfLines={3}
-            />
-
-            <Text style={styles.sectionTitle}>Client Information</Text>
-            <TextInput
-              label="Client Name"
-              value={invoice.client?.name || ''}
-              onChangeText={(text) => updateInvoice({
-                client: { ...invoice.client, name: text, id: invoice.client?.id || Date.now().toString(), email: invoice.client?.email || '' }
-              })}
-              placeholder="Client name"
-              required
-            />
-            <TextInput
-              label="Client Email"
-              value={invoice.client?.email || ''}
-              onChangeText={(text) => updateInvoice({
-                client: { ...invoice.client, email: text, id: invoice.client?.id || Date.now().toString(), name: invoice.client?.name || '' }
-              })}
-              placeholder="client@example.com"
-              keyboardType="email-address"
-              required
-            />
-            {/* <View style={styles.section}> */}
-            <Text style={styles.sectionTitle}>Invoice Details</Text>
-            <TextInput
-              label="Invoice Number"
-              value={invoice.invoiceNumber}
-              onChangeText={(text) => updateInvoice({ invoiceNumber: text })}
-              placeholder="INV-001"
-              required
-            />
-            <DatePicker
-              label="Invoice Date"
-              value={invoice.invoiceDate}
-              onChange={(date) => updateInvoice({ invoiceDate: date })}
-              required
-            />
-            <DatePicker
-              label="Due Date"
-              value={invoice.dueDate}
-              onChange={(date) => updateInvoice({ dueDate: date })}
-              required
-            />
-            <Text style={styles.title}>Line Items</Text>
-            {/* </View> */}
-          </View>
-        }
-        ListFooterComponent={
-          <View style={styles.section}>
+    <>
+      <Container>
+        <FlatList
+          data={invoice.lineItems}
+          renderItem={renderLineItem}
+          renderScrollComponent={(props) => <KeyboardAwareScrollView bottomOffset={bottomOffset} {...props} />}
+          ListHeaderComponent={
             <View style={styles.section}>
-              <Button
-                title="+ Add Item"
-                onPress={addLineItem}
-                variant="outline"
-                style={styles.addButton}
-              />
-            </View>
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Tax & Totals</Text>
+              <Text style={styles.sectionTitle}>Business Information</Text>
               <TextInput
-                label="Tax Percentage"
-                value={invoice.taxPercentage.toString()}
-                onChangeText={(text) => updateInvoice({ taxPercentage: Number(text) || 0 })}
-                keyboardType="numeric"
-                placeholder="0"
+                label="Business Name"
+                value={invoice.businessInfo.name}
+                onChangeText={(text) => updateInvoice({
+                  businessInfo: { ...invoice.businessInfo, name: text }
+                })}
+                placeholder="Your business name"
+                required
+              />
+              <TextInput
+                label="Address"
+                value={invoice.businessInfo.address}
+                onChangeText={(text) => updateInvoice({
+                  businessInfo: { ...invoice.businessInfo, address: text }
+                })}
+                placeholder="Business address"
+                multiline
+                numberOfLines={3}
               />
 
-              <View style={styles.totalsContainer}>
-                <View style={styles.totalRow}>
-                  <Text style={styles.totalLabel}>Subtotal:</Text>
-                  <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
-                </View>
-                <View style={styles.totalRow}>
-                  <Text style={styles.totalLabel}>Tax ({invoice.taxPercentage}%):</Text>
-                  <Text style={styles.totalValue}>${invoice.taxAmount.toFixed(2)}</Text>
-                </View>
-                <View style={[styles.totalRow, styles.finalTotal]}>
-                  <Text style={styles.finalTotalLabel}>Total:</Text>
-                  <Text style={styles.finalTotalValue}>${invoice.total.toFixed(2)}</Text>
+              <Text style={styles.sectionTitle}>Client Information</Text>
+              <TextInput
+                label="Client Name"
+                value={invoice.client?.name || ''}
+                onChangeText={(text) => updateInvoice({
+                  client: { ...invoice.client, name: text, email: invoice.client?.email || '' }
+                })}
+                placeholder="Client name"
+                required
+              />
+              <TextInput
+                label="Client Email"
+                value={invoice.client?.email || ''}
+                onChangeText={(text) => updateInvoice({
+                  client: { ...invoice.client, email: text, name: invoice.client?.name || '' }
+                })}
+                placeholder="client@example.com"
+                keyboardType="email-address"
+                required
+              />
+              <Text style={styles.sectionTitle}>Invoice Details</Text>
+              <TextInput
+                label="Invoice Number"
+                value={invoice.invoiceNumber}
+                onChangeText={(text) => updateInvoice({ invoiceNumber: text })}
+                placeholder="INV-001"
+                required
+              />
+              <DatePicker
+                label="Invoice Date"
+                value={invoice.invoiceDate}
+                onChange={(date) => updateInvoice({ invoiceDate: date })}
+                required
+              />
+              <DatePicker
+                label="Due Date"
+                value={invoice.dueDate}
+                onChange={(date) => updateInvoice({ dueDate: date })}
+                required
+              />
+              <Text style={styles.title}>Line Items</Text>
+            </View>
+          }
+          ListFooterComponent={
+            <View style={styles.section}>
+              <View style={styles.section}>
+                <Button
+                  title="+ Add Item"
+                  onPress={addLineItem}
+                  variant="outline"
+                  style={styles.addButton}
+                />
+              </View>
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Tax & Totals</Text>
+                <TextInput
+                  label="Tax Percentage"
+                  value={invoice.taxPercentage.toString()}
+                  onChangeText={(text) => updateInvoice({ taxPercentage: Number(text) || 0 })}
+                  keyboardType="numeric"
+                  placeholder="0"
+                />
+
+                <View style={styles.totalsContainer}>
+                  <View style={styles.totalRow}>
+                    <Text style={styles.totalLabel}>Subtotal:</Text>
+                    <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.totalRow}>
+                    <Text style={styles.totalLabel}>Tax ({invoice.taxPercentage}%):</Text>
+                    <Text style={styles.totalValue}>${invoice.taxAmount.toFixed(2)}</Text>
+                  </View>
+                  <View style={[styles.totalRow, styles.finalTotal]}>
+                    <Text style={styles.finalTotalLabel}>Total:</Text>
+                    <Text style={styles.finalTotalValue}>${invoice.total.toFixed(2)}</Text>
+                  </View>
                 </View>
               </View>
+              <View>
+                <TextInput
+                  label="Notes / Terms"
+                  value={invoice.notes}
+                  onChangeText={(text) => updateInvoice({ notes: text })}
+                  placeholder="Payment terms, additional notes..."
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
             </View>
-            <View style={styles.section}>
-              <TextInput
-                label="Notes / Terms"
-                value={invoice.notes}
-                onChangeText={(text) => updateInvoice({ notes: text })}
-                placeholder="Payment terms, additional notes..."
-                multiline
-                numberOfLines={4}
-              />
-            </View>
-          </View>
-        }
-      >
-      </FlatList>
+          }
+        />
 
-      {/* Action Buttons */}
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Cancel"
-          onPress={handleCancel}
-          variant="ghost"
-          style={styles.button}
-        />
-        <Button
-          title="Save Draft"
-          onPress={handleSaveDraft}
-          variant="outline"
-          style={styles.button}
-        />
-        <Button
-          title="Preview"
-          onPress={handlePreview}
-          style={styles.button}
-        />
-      </View>
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Back"
+            onPress={() => router.back()}
+            variant="ghost"
+            style={styles.button}
+          />
+          <Button
+            title="Cancel"
+            onPress={handleCancel}
+            variant="ghost"
+            style={styles.button}
+          />
+          <Button
+            title="Preview"
+            onPress={handlePreview}
+            style={styles.button}
+          />
+        </View>
 
-      {/* Toast Messages */}
-      {toasts.map((toast) => (
-        <Toast key={toast.id} toast={toast} onHide={hideToast} />
-      ))}
-      {/* </View> */}
-    </AdvancedAdaptiveContainer>
+        {toasts.map((toast) => (
+          <Toast key={toast.id} toast={toast} onHide={hideToast} />
+        ))}
+      </Container>
+      <KeyboardToolbar/>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
   scrollView: {
     flex: 1,
   },
   content: {
-    padding: 16,
+    // padding: 16,
   },
   title: {
     fontSize: 24,
@@ -283,7 +280,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     padding: 16,
-    paddingTop: 8,
     gap: 8,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
