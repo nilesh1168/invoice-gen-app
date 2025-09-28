@@ -1,15 +1,34 @@
 import { Invoice } from "../constants/types";
 export const validateInvoice = (invoice: Invoice): string[] => {
   const errors: string[] = [];
-  
-  if (!invoice.client) {
-    errors.push('Client is required');
-  }
-  
   if (!invoice.businessInfo.name) {
     errors.push('Business name is required');
   }
   
+  if (!invoice.client?.name) {
+    errors.push('Client is required');
+  }
+  
+  if (!invoice.client?.email) {
+    errors.push('Client email is required');
+  }
+  
+  if (!invoice.invoiceNumber) {
+    errors.push('Invoice number is required');
+  }
+  
+  if (!invoice.invoiceDate) {
+    errors.push('Invoice date is required');
+  }
+  
+  if (!invoice.dueDate) {
+    errors.push('Due date is required');
+  }
+
+  if(invoice.dueDate < invoice.invoiceDate) {
+    errors.push('Due date should be after Invoice date');
+  }
+
   if (invoice.lineItems.length === 0) {
     errors.push('At least one line item is required');
   }
