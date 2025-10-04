@@ -8,9 +8,14 @@ export const validateInvoice = (invoice: Invoice): string[] => {
   if (!invoice.client?.name) {
     errors.push('Client is required');
   }
-  
+
   if (!invoice.client?.email) {
     errors.push('Client email is required');
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (invoice.client?.email && !emailRegex.test(invoice.client.email)) {
+    errors.push('Client email is invalid');
   }
   
   if (!invoice.invoiceNumber) {
