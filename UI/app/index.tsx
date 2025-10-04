@@ -9,7 +9,7 @@ export default function index() {
     <View style={styles.container}>
       {/* Image in the center */}
       <Image
-        source={require('../assets/invoicegen.png')}
+        source={require('../assets/splash-icon-dark.png')}
         style={styles.image}
         resizeMode="contain"
       />
