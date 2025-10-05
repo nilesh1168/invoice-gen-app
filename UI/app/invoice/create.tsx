@@ -14,6 +14,7 @@ import { LineItem } from '../../constants/types';
 import { Container } from '../../components/ui/Container';
 import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Currency } from '../../constants/currencies';
 
 export default function CreateInvoiceScreen() {
   const {
@@ -62,6 +63,7 @@ export default function CreateInvoiceScreen() {
       item={item}
       onUpdate={updateLineItem}
       onRemove={removeLineItem}
+      currency={invoice.currency}
     />
   );
 
@@ -74,6 +76,7 @@ export default function CreateInvoiceScreen() {
           data={invoice.lineItems}
           renderItem={renderLineItem}
           renderScrollComponent={(props) => <KeyboardAwareScrollView bottomOffset={bottomOffset} {...props} />}
+          showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Business Information</Text>
@@ -137,6 +140,23 @@ export default function CreateInvoiceScreen() {
                 onChange={(date) => updateInvoice({ dueDate: date })}
                 required
               />
+              {/* add 2 buttons to select the currency (INR and USD) with INR as default selected. Use the app color theme */}
+              <View style={styles.currencyContainer}>
+                <Text style={styles.currencyText}>Currency:</Text>
+                <Button
+                  title="INR"
+                  onPress={() => updateInvoice({ currency: 'INR' })}
+                  variant={invoice.currency === 'INR' ? 'outline' : 'ghost'}
+                  style={styles.currencyButton}
+                />
+                <Button
+                  title="USD"
+                  onPress={() => updateInvoice({ currency: 'USD' })}
+                  variant={invoice.currency === 'USD' ? 'outline' : 'ghost'}
+                  style={styles.currencyButton}
+                />
+              </View>
+
               <Text style={styles.title}>Line Items</Text>
             </View>
           }
@@ -163,15 +183,15 @@ export default function CreateInvoiceScreen() {
                 <View style={styles.totalsContainer}>
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Subtotal:</Text>
-                    <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
+                    <Text style={styles.totalValue}>{Currency[invoice.currency]} {invoice.subtotal.toFixed(2)}</Text>
                   </View>
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Tax ({invoice.taxPercentage}%):</Text>
-                    <Text style={styles.totalValue}>${invoice.taxAmount.toFixed(2)}</Text>
+                    <Text style={styles.totalValue}>{Currency[invoice.currency]} {invoice.taxAmount.toFixed(2)}</Text>
                   </View>
                   <View style={[styles.totalRow, styles.finalTotal]}>
                     <Text style={styles.finalTotalLabel}>Total:</Text>
-                    <Text style={styles.finalTotalValue}>${invoice.total.toFixed(2)}</Text>
+                    <Text style={styles.finalTotalValue}>{Currency[invoice.currency]} {invoice.total.toFixed(2)}</Text>
                   </View>
                 </View>
               </View>
@@ -200,8 +220,8 @@ export default function CreateInvoiceScreen() {
           <Button
             title="Cancel"
             onPress={handleCancel}
-            variant="ghost"
-            style={styles.button}
+            variant="error"
+            style={styles.cancelBtn}
           />
           <Button
             title="Preview"
@@ -220,11 +240,22 @@ export default function CreateInvoiceScreen() {
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
+  currencyText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+    alignSelf: 'center',
+  },
+  currencyContainer: {
+    flexDirection: 'row',
+    gap: 20,
+    marginBottom: 16,
+  },
+  currencyButton: {
     flex: 1,
   },
-  content: {
-    // padding: 16,
+  scrollView: {
+    flex: 1,
   },
   title: {
     fontSize: 24,
@@ -284,6 +315,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.border,
     backgroundColor: Colors.surface,
+  },
+  cancelBtn: {
+    flex: 1,
   },
   button: {
     flex: 1,

@@ -1,11 +1,11 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, BackHandler } from 'react-native';
 import { Colors } from '../../constants/colors';
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'| 'error';
   disabled?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
@@ -90,4 +90,10 @@ const styles = StyleSheet.create({
   disabledText: {
     color: Colors.surface,
   },
+  error: {
+    backgroundColor: 'transparent',
+  },
+  errorText:{
+    color: Colors.error,
+  }
 });

@@ -1,6 +1,8 @@
 import { printToFileAsync } from "expo-print";
 import { Invoice } from "../constants/types";
 import { Alert } from "react-native";
+import { Currency } from "../constants/currencies";
+import { numberToCurrencyWords } from "./numberToWord";
 
 // Format date for display
 const formatDate = (date: Date | string): string => {
@@ -76,8 +78,8 @@ const generateInvoiceHTML = (invoice: Invoice) => {
             <tr>
               <td>${item.description}</td>
               <td>${item.quantity}</td>
-              <td>$${item.unitPrice.toFixed(2)}</td>
-              <td>$${item.total.toFixed(2)}</td>
+              <td>${Currency[invoice.currency]}${item.unitPrice.toFixed(2)}</td>
+              <td>${Currency[invoice.currency]}${item.total.toFixed(2)}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -86,15 +88,19 @@ const generateInvoiceHTML = (invoice: Invoice) => {
             <div class="totals-section">
               <div class="total-row subtotal">
                 <span>Subtotal</span>
-                <span>$${invoice.subtotal.toFixed(2)}</span>
+                <span>${Currency[invoice.currency]}${invoice.subtotal.toFixed(2)}</span>
               </div>
               <div class="total-row tax">
                 ${invoice.taxPercentage > 0 ? `<span>Tax (${invoice.taxPercentage}%)</span>
-                <span>$${invoice.taxAmount.toFixed(2)}</span>` : ''}
+                <span>${Currency[invoice.currency]}${invoice.taxAmount.toFixed(2)}</span>` : ''}
               </div>
               <div class="total-row final-total">
                 <span>Total Amount Due</span>
-                <span>$${invoice.total.toFixed(2)}</span>
+                <span>${Currency[invoice.currency]}${invoice.total.toFixed(2)}</span>
+              </div>
+              <div class="total-row">
+                <span>In Words:</span>
+                <span>${numberToCurrencyWords(invoice.total, invoice.currency)}</span>
               </div>
             </div>
             ${invoice.notes ? `
@@ -144,15 +150,17 @@ const generateInvoiceHTML = (invoice: Invoice) => {
             <div class="totals-section">
               <div class="total-row subtotal">
                 <span>Subtotal</span>
-                <span>$${invoice.subtotal.toFixed(2)}</span>
+                <span>${Currency[invoice.currency]}${invoice.subtotal.toFixed(2)}</span>
               </div>
               <div class="total-row tax">
                 ${invoice.taxPercentage > 0 ? `<span>Tax (${invoice.taxPercentage}%)</span>
-                <span>$${invoice.taxAmount.toFixed(2)}</span>` : ''}
+                <span>${Currency[invoice.currency]}${invoice.taxAmount.toFixed(2)}</span>` : ''}
               </div>
               <div class="total-row final-total">
                 <span>Total Amount Due</span>
-                <span>$${invoice.total.toFixed(2)}</span>
+                <span>${Currency[invoice.currency]}${invoice.total.toFixed(2)}</span>
+                <span>In Words:</span>
+                <span>${numberToCurrencyWords(invoice.total, invoice.currency)}</span>
               </div>
             </div>
             ${invoice.notes ? `

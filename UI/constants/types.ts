@@ -33,4 +33,5 @@ export interface Invoice {
   subtotal: number;
   taxAmount: number;
   total: number;
+  currency: string;
 }

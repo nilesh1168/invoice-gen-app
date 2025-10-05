@@ -3,14 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LineItem } from '../../constants/types';
 import { Colors } from '../../constants/colors';
 import { TextInput } from '../ui/TextInput';
+import { Currency } from '../../constants/currencies';
 
 interface LineItemInputProps {
   item: LineItem;
   onRemove: (id: string) => void;
   onUpdate: (id: string, updates: Partial<LineItem>) => void;
+  currency: string;
 }
 
-export const LineItemInput: React.FC<LineItemInputProps> = ({ item, onRemove, onUpdate }) => {
+export const LineItemInput: React.FC<LineItemInputProps> = ({ item, onRemove, onUpdate, currency }) => {
   return (
     <View style={styles.lineItem}>
       <TextInput
@@ -39,7 +41,7 @@ export const LineItemInput: React.FC<LineItemInputProps> = ({ item, onRemove, on
         />
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>${item.total.toFixed(2)}</Text>
+          <Text style={styles.totalValue}>{Currency[currency]} {item.total.toFixed(2)}</Text>
         </View>
       </View>
       <TouchableOpacity style={styles.removeButton} onPress={() => onRemove(item.id)}>

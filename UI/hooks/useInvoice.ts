@@ -23,7 +23,8 @@ export const useInvoice = () => {
     notes: '',
     subtotal: 0,
     taxAmount: 0,
-    total: 0
+    total: 0,
+    currency: 'INR',
   });
 
   const updateInvoice = (updates: Partial<Invoice>) => {
@@ -96,7 +97,8 @@ export const useInvoice = () => {
       notes: '',
       subtotal: 0,
       taxAmount: 0,
-      total: 0
+      total: 0,
+      currency: 'INR',
     });
   };
 
