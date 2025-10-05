@@ -42,11 +42,11 @@ export const validateInvoice = (invoice: Invoice): string[] => {
     if (!item.description.trim()) {
       errors.push(`Line item ${index + 1}: Description is required`);
     }
-    if (item.quantity <= 0) {
-      errors.push(`Line item ${index + 1}: Quantity must be greater than 0`);
+    if (item.quantity <= 0 || item.quantity > 1000000000) {
+      errors.push(`Line item ${index + 1}: Quantity must be greater than 0 and less than or equal to 1000000000`);
     }
-    if (item.unitPrice <= 0) {
-      errors.push(`Line item ${index + 1}: Unit price must be greater than 0`);
+    if (item.unitPrice <= 0 || item.unitPrice > 1000000000) {
+      errors.push(`Line item ${index + 1}: Unit price must be greater than 0 and less than or equal to 1000000000`);
     }
   });
   

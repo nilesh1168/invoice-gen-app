@@ -1,14 +1,14 @@
 import { Currency } from "../constants/currencies";
 
 const ONES = [
-  '', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'
+  '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'
 ];
 const TEENS = [
-  'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
-  'sixteen', 'seventeen', 'eighteen', 'nineteen'
+  'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen',
+  'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
 ];
 const TENS = [
-  '', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'
+  '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
 ];
 
 function twoDigitToWords(n: number): string {
@@ -21,12 +21,12 @@ function twoDigitToWords(n: number): string {
 
 function threeDigitToWords(n: number): string {
   // n is 0..999
-  if (n === 0) return 'zero';
+  if (n === 0) return 'Zero';
   const parts: string[] = [];
   const hundreds = Math.floor(n / 100);
   const rest = n % 100;
   if (hundreds) {
-    parts.push(`${ONES[hundreds]} hundred`);
+    parts.push(`${ONES[hundreds]} Hundred`);
   }
   if (rest) {
     // add a space between hundreds and the rest
@@ -37,14 +37,14 @@ function threeDigitToWords(n: number): string {
 
 function integerToWordsUSD(n: number): string {
   // n is 0..100,000,000
-  if (n === 0) return 'zero';
+  if (n === 0) return 'Zero';
   const parts: string[] = [];
   const millions = Math.floor(n / 1_000_000); // up to 100
   const thousands = Math.floor((n % 1_000_000) / 1_000);
   const hundreds = n % 1_000;
 
-  if (millions) parts.push(`${threeDigitToWords(millions)} million`);
-  if (thousands) parts.push(`${threeDigitToWords(thousands)} thousand`);
+  if (millions) parts.push(`${threeDigitToWords(millions)} Million`);
+  if (thousands) parts.push(`${threeDigitToWords(thousands)} Thousand`);
   if (hundreds) parts.push(`${threeDigitToWords(hundreds)}`);
 
   return parts.join(' ');
@@ -52,16 +52,16 @@ function integerToWordsUSD(n: number): string {
 
 function integerToWordsINR(n: number): string {
   // Indian system: crore (1e7), lakh (1e5), thousand (1e3), hundred
-  if (n === 0) return 'zero';
+  if (n === 0) return 'Zero';
   const parts: string[] = [];
   const crore = Math.floor(n / 10_000_000); // 1 crore = 10,000,000
   const lakh = Math.floor((n % 10_000_000) / 100_000);
   const thousand = Math.floor((n % 100_000) / 1_000);
   const hundreds = n % 1_000;
 
-  if (crore) parts.push(`${threeDigitToWords(crore)} crore`);
-  if (lakh) parts.push(`${threeDigitToWords(lakh)} lakh`);
-  if (thousand) parts.push(`${threeDigitToWords(thousand)} thousand`);
+  if (crore) parts.push(`${threeDigitToWords(crore)} Crore`);
+  if (lakh) parts.push(`${threeDigitToWords(lakh)} Lakh`);
+  if (thousand) parts.push(`${threeDigitToWords(thousand)} Thousand`);
   if (hundreds) parts.push(`${threeDigitToWords(hundreds)}`);
 
   return parts.join(' ');
@@ -102,16 +102,16 @@ export function numberToCurrencyWords(amount: number, currency: string): string 
   // currency unit names
   const names = {
     USD: {
-      majorSingular: 'dollar',
-      majorPlural: 'dollars',
-      minorSingular: 'cent',
-      minorPlural: 'cents'
+      majorSingular: 'Dollar',
+      majorPlural: 'Dollars',
+      minorSingular: 'Cent',
+      minorPlural: 'Cents'
     },
     INR: {
-      majorSingular: 'rupee',
-      majorPlural: 'rupees',
-      minorSingular: 'paise', // paise is commonly used as plural same form
-      minorPlural: 'paise'
+      majorSingular: 'Rupee',
+      majorPlural: 'Rupees',
+      minorSingular: 'Paise', // paise is commonly used as plural same form
+      minorPlural: 'Paise'
     }
   } as const;
 
@@ -134,7 +134,7 @@ export function numberToCurrencyWords(amount: number, currency: string): string 
     parts.push(`and ${fracWords} ${minorUnit}`);
   }
 
-  parts.push('only');
+  parts.push('Only');
 
   // join with single spaces; normalize multiple spaces from potential joins
   return parts.join(' ').replace(/\s+/g, ' ').trim();

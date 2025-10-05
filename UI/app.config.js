@@ -1,6 +1,6 @@
 export default {
   expo: {
-    entryPoint: "./index.tsx",
+    entryPoint: "./src/app/index.tsx",
     scheme: "invoiceGen",
     name: "InvoiceGen",
     slug: "InvoiceGen",
