@@ -87,6 +87,7 @@ export default function CreateInvoiceScreen() {
                   businessInfo: { ...invoice.businessInfo, name: text }
                 })}
                 placeholder="Your business name"
+                style={styles.textInputStyle}
                 required
               />
               <TextInput
@@ -96,6 +97,7 @@ export default function CreateInvoiceScreen() {
                   businessInfo: { ...invoice.businessInfo, address: text }
                 })}
                 placeholder="Business address"
+                style={styles.textInputStyle}
                 multiline
                 numberOfLines={3}
               />
@@ -108,6 +110,7 @@ export default function CreateInvoiceScreen() {
                   client: { ...invoice.client, name: text, email: invoice.client?.email || '' }
                 })}
                 placeholder="Client name"
+                style={styles.textInputStyle}
                 required
               />
               <TextInput
@@ -118,6 +121,7 @@ export default function CreateInvoiceScreen() {
                 })}
                 placeholder="client@example.com"
                 keyboardType="email-address"
+                style={styles.textInputStyle}
                 required
               />
               <Text style={styles.sectionTitle}>Invoice Details</Text>
@@ -126,6 +130,7 @@ export default function CreateInvoiceScreen() {
                 value={invoice.invoiceNumber}
                 onChangeText={(text) => updateInvoice({ invoiceNumber: text })}
                 placeholder="INV-001"
+                style={styles.textInputStyle}
                 required
               />
               <DatePicker
@@ -178,6 +183,7 @@ export default function CreateInvoiceScreen() {
                   onChangeText={(text) => updateInvoice({ taxPercentage: Number(text) || 0 })}
                   keyboardType="numeric"
                   placeholder="0"
+                  style={styles.textInputStyle}
                 />
 
                 <View style={styles.totalsContainer}>
@@ -201,8 +207,9 @@ export default function CreateInvoiceScreen() {
                   value={invoice.notes}
                   onChangeText={(text) => updateInvoice({ notes: text })}
                   placeholder="Payment terms, additional notes..."
-                  multiline
                   numberOfLines={4}
+                  style={styles.textInputStyle}
+                  multiline
                 />
               </View>
             </View>
@@ -240,6 +247,9 @@ export default function CreateInvoiceScreen() {
 }
 
 const styles = StyleSheet.create({
+  textInputStyle:{
+    backgroundColor: Colors.background,
+  },
   currencyText: {
     fontSize: 16,
     fontWeight: '500',

@@ -9,6 +9,7 @@ import { printToFileAsync } from 'expo-print';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
 import { WebView } from 'react-native-webview';
 import { generateInvoiceHTML } from '../../utils/pdf_utils';
+import { Container } from '../../components/ui/Container';
 const { width } = Dimensions.get('window');
 
 export default function PreviewInvoiceScreen() {
@@ -45,7 +46,7 @@ export default function PreviewInvoiceScreen() {
 
 
   return (
-    <>
+    <Container>
       <WebView
         originWhitelist={['*']}
         source={{ html: generateInvoiceHTML(invoice) }}
@@ -57,7 +58,6 @@ export default function PreviewInvoiceScreen() {
         <Button
           title="Download"
           onPress={handleDownload}
-          variant="secondary"
           style={styles.button}
         />
         <Button
@@ -72,7 +72,7 @@ export default function PreviewInvoiceScreen() {
       {toasts.map((toast) => (
         <Toast key={toast.id} toast={toast} onHide={hideToast} />
       ))}
-      </>
+      </Container>
   );
 }
 
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     padding: 16,
-    paddingTop: 8,
+    // paddingTop: 8,
     gap: 8,
     borderTopWidth: 1,
     borderTopColor: Colors.border,

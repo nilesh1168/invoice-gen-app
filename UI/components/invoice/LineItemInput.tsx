@@ -20,6 +20,7 @@ export const LineItemInput: React.FC<LineItemInputProps> = ({ item, onRemove, on
         value={item.description}
         onChangeText={(text) => onUpdate(item.id, { description: text })}
         placeholder="Item description"
+        style={styles.textInputStyle}
         required
       />
       <View style={styles.row}>
@@ -28,7 +29,7 @@ export const LineItemInput: React.FC<LineItemInputProps> = ({ item, onRemove, on
           value={item.quantity.toString()}
           onChangeText={(text) => onUpdate(item.id, { quantity: Number(text) || 0 })}
           keyboardType="numeric"
-          style={styles.quantityInput}
+          style={styles.textInputStyle}
           required
         />
         <TextInput
@@ -36,7 +37,7 @@ export const LineItemInput: React.FC<LineItemInputProps> = ({ item, onRemove, on
           value={item.unitPrice.toString()}
           onChangeText={(text) => onUpdate(item.id, { unitPrice: Number(text) || 0 })}
           keyboardType="numeric"
-          style={styles.priceInput}
+          style={styles.textInputStyle}
           required
         />
         <View style={styles.totalContainer}>
@@ -52,6 +53,9 @@ export const LineItemInput: React.FC<LineItemInputProps> = ({ item, onRemove, on
 };
 
 const styles = StyleSheet.create({
+  textInputStyle:{
+    backgroundColor: Colors.background,
+  },
   lineItem: {
     backgroundColor: Colors.surface,
     padding: 16,
@@ -64,12 +68,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 12,
-  },
-  quantityInput: {
-    flex: 1,
-  },
-  priceInput: {
-    flex: 1,
   },
   totalContainer: {
     flex: 1,
