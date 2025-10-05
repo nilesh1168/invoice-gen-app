@@ -76,22 +76,22 @@ describe('Invoice validation', () => {
     {
       description: 'Line Items provided but unit price is zero',
       invoice: { ...validInvoice, lineItems: [{ ...validInvoice.lineItems[0], unitPrice: 0 }] },
-      expectedErrors: ['Line item 1: Unit price must be greater than 0'],
+      expectedErrors: ['Line item 1: Unit price must be greater than 0 and less than or equal to 100000000'],
     },
     {
       description: 'Line Items provided but quantity is zero',
       invoice: { ...validInvoice, lineItems: [{ ...validInvoice.lineItems[0], quantity: 0 }] },
-      expectedErrors: ['Line item 1: Quantity must be greater than 0'],
+      expectedErrors: ['Line item 1: Quantity must be greater than 0 and less than or equal to 100000000'],
     },
     {
       description: 'Line Items provided but unit price is negative',
       invoice: { ...validInvoice, lineItems: [{ ...validInvoice.lineItems[0], unitPrice: -10 }] },
-      expectedErrors: ['Line item 1: Unit price must be greater than 0'],
+      expectedErrors: ['Line item 1: Unit price must be greater than 0 and less than or equal to 100000000'],
     },
     {
       description: 'Line Items provided but quantity is negative',
       invoice: { ...validInvoice, lineItems: [{ ...validInvoice.lineItems[0], quantity: -5 }] },
-      expectedErrors: ['Line item 1: Quantity must be greater than 0'],
+      expectedErrors: ['Line item 1: Quantity must be greater than 0 and less than or equal to 100000000'],
     },
     {
       description: 'Line Items provided but quantity is decimal',

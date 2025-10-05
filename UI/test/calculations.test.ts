@@ -17,7 +17,7 @@ describe('Line Item Calculation', () => {
     { description: 'negative quantity', quantity: -3, unitPrice: 50, expected: -1 }, // Invalid case
     { description: 'negative unit price', quantity: 3, unitPrice: -50, expected: -1 }, // Invalid case
     { description: 'large unit price (100,000,000 + 1)', quantity: 1, unitPrice: 100_000_001, expected: -1 }, // Invalid case
-    { description: 'large quantity (1,000,000,000 + 1)', quantity: 1_000_000_001, unitPrice: 1, expected: -1 }, // Invalid case
+    { description: 'large quantity (1,000,000,000 + 1)', quantity: 100_000_001, unitPrice: 1, expected: -1 }, // Invalid case
   ];
 
   testCases.forEach(({ description, quantity, unitPrice, expected }) => {
@@ -81,6 +81,14 @@ describe('Line Items Subtotal Calculations', () => {
       ],
       expected: -1, // Exceeds limit
     },
+        {
+      description: 'total in fractions',
+      items: [
+        { id: '1', description: 'Expensive Item', quantity: 1, unitPrice: 0.5, total: 0.5 },
+        { id: '2', description: 'Pen', quantity: 1, unitPrice: 0.5, total: 0.5 },
+      ],
+      expected: 1,
+    },
   ];
 
   testCases.forEach(({ description, items, expected }) => {
@@ -123,8 +131,6 @@ describe('Tax Amount Calculations', () => {
   });
 });
 
-
-
 describe('Total Calculations', () => {
   interface TestCase {
     description: string;
@@ -142,7 +148,7 @@ describe('Total Calculations', () => {
     { description: 'subtotal large (100,000,000 + 1)', subtotal: 100_000_001, taxAmount: 100, expected: -1 }, // Invalid case
 
     { description: 'tax amount zero', subtotal: 500, taxAmount: 0, expected: 500 },
-    { description: 'tax amount negative', subtotal: 500, taxAmount: -50, expected: 450 },
+    { description: 'tax amount negative', subtotal: 500, taxAmount: -50, expected: -1 },
     { description: 'tax amount decimal', subtotal: 200, taxAmount: 19.99, expected: 219.99, useCloseTo: true },
     { description: 'tax amount normal', subtotal: 1000, taxAmount: 180, expected: 1180 },
     { description: 'tax amount large (100,000,000 + 1)', subtotal: 500, taxAmount: 100_000_001, expected: -1 }, // Invalid case

@@ -75,11 +75,19 @@ function integerToWordsINR(n: number): string {
  *   numberToCurrencyWords(12345678.9, 'INR') => "one crore twenty-three lakh forty-five thousand six hundred seventy-eight rupees and ninety paise only"
  */
 export function numberToCurrencyWords(amount: number, currency: string): string {
+  // if currency is not supported throw unsupported currency error
+  // if amount is less than 0 return "Negative value not supported"
+  if (!Currency[currency]) {
+    throw new Error(`Unsupported currency: ${currency}`);
+  }
+  if (amount < 0) {
+    return 'Negative value not supported'; 
+  }
+
   if (!Number.isFinite(amount)) {
     throw new Error('Amount must be a finite number');
   }
 
-  const isNegative = amount < 0;
   const absAmount = Math.abs(amount);
 
   // Use integer arithmetic for cents/paise to avoid float issues
@@ -91,13 +99,28 @@ export function numberToCurrencyWords(amount: number, currency: string): string 
   if (integerPart > 100_000_000) {
     throw new Error('This function supports integer part up to 100,000,000 only.');
   }
-
+  
   let integerWords: string;
-  if (currency === 'USD') {
-    integerWords = integerToWordsUSD(integerPart);
-  } else { // INR
-    integerWords = integerToWordsINR(integerPart);
+  // Remember that 0.100 is 1 Rupee or 1 Dollar, not 10 paise or 10 cents
+  // So if fractionPart is 100, we need to increment integerPart by 1 and set fractionPart to 0
+  // Adjust for cases where fractionPart rounds to 100
+  let adjustedIntegerPart = integerPart;
+  let adjustedFractionPart = fractionPart;
+
+  if (fractionPart === 100) {
+    adjustedIntegerPart += 1;
+    adjustedFractionPart = 0;
   }
+
+  if (currency === 'USD') {
+    integerWords = integerToWordsUSD(adjustedIntegerPart);
+  } else {
+    integerWords = integerToWordsINR(adjustedIntegerPart);
+  }
+
+  const fracWords = threeDigitToWords(adjustedFractionPart);
+
+
 
   // currency unit names
   const names = {
@@ -115,26 +138,49 @@ export function numberToCurrencyWords(amount: number, currency: string): string 
     }
   } as const;
 
-  const cur = Currency[currency] ? names[currency as keyof typeof names] : names['INR'];
+  const cur = names[currency as keyof typeof names] || names['INR'];
 
-  const majorUnit = integerPart === 1 ? cur.majorSingular : cur.majorPlural;
-  const minorUnit = fractionPart === 1 ? cur.minorSingular : cur.minorPlural;
+  const majorUnit = adjustedIntegerPart === 1 ? cur.majorSingular : cur.majorPlural;
+  const minorUnit = adjustedFractionPart === 1 ? cur.minorSingular : cur.minorPlural;
 
   const parts: string[] = [];
-
-  if (isNegative) parts.push('minus');
-
-  // Integer part (major unit)
-  parts.push(`${integerWords} ${majorUnit}`);
-
-  // Fractional part (minor unit)
-  if (fractionPart > 0) {
-    // Convert fractional part (0..99) to words using threeDigitToWords (works for 0..999)
-    const fracWords = threeDigitToWords(fractionPart);
-    parts.push(`and ${fracWords} ${minorUnit}`);
+  // if integerPart is 0 and fractionPart is 0, we say "Zero Rupees Only" or "Zero Dollars Only"
+  // if integerPart is 0, and fractionPart > 0, we say "X Paise Only" or "X Cents Only"
+  // if integerPart > 0 and fractionPart is 0, we say "X Rupees Only" or "X Dollars Only"
+  // if integerPart > 0 and fractionPart > 0, we say "X Rupees and Y Paise Only" or "X Dollars and Y Cents Only"
+  // Handle zero case
+  if (adjustedIntegerPart === 0 && adjustedFractionPart === 0) {
+    parts.push(`Zero ${majorUnit}`);
+    parts.push('Only');
+    return parts.join(' ');
   }
 
-  parts.push('Only');
+  // Handle non-zero cases
+  if (adjustedIntegerPart === 0 && adjustedFractionPart > 0) {
+    parts.push(`${fracWords} ${minorUnit}`);
+    parts.push('Only');
+    // return parts.join(' ');
+  } else if (adjustedIntegerPart > 0 && adjustedFractionPart === 0) {
+    // 1234; "One Thousand Two Hundred and Thirty-Four Rupees Only" handle the 'and' before last part if hundreds is present
+    if (adjustedIntegerPart % 1000 !== adjustedIntegerPart && (adjustedIntegerPart % 100) < 100 && (adjustedIntegerPart % 100) > 0) {
+      // there are thousands and hundreds, and a non-zero tens/ones part
+      const lastSpaceIndex = integerWords.lastIndexOf(' ');
+      if (lastSpaceIndex !== -1) {
+        integerWords = integerWords.slice(0, lastSpaceIndex) + ' and' + integerWords.slice(lastSpaceIndex);
+      }
+    }
+    parts.push(`${integerWords} ${majorUnit}`);
+    parts.push('Only');
+    // return parts.join(' ');
+  } else if (adjustedIntegerPart > 0 && adjustedFractionPart > 0) {
+    parts.push(`${integerWords} ${majorUnit}`);
+    parts.push('and');
+    parts.push(`${fracWords} ${minorUnit}`);
+    parts.push('Only');
+    // return parts.join(' ');
+  }
+
+  // parts.push('Only');
 
   // join with single spaces; normalize multiple spaces from potential joins
   return parts.join(' ').replace(/\s+/g, ' ').trim();

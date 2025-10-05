@@ -9,14 +9,16 @@ describe('Number to Word Conversion for INR', () => {
   }
 
   const testCases: TestCase[] = [
-    { description: 'Zero rupees', amount: 0, expected: 'zero rupees only' },
-    { description: 'Single rupee', amount: 1, expected: 'one rupee only' },
-    { description: 'Single paise', amount: 0.01, expected: 'one paise only' },
-    { description: 'Ten paise', amount: 0.1, expected: 'one paise only' },
-    { description: 'Rupees with paise', amount: 1234.56, expected: 'one thousand two hundred thirty-four rupees and fifty-six paise only' },
-    { description: 'Crore and lakh', amount: 12345678.9, expected: 'one crore twenty-three lakh forty-five thousand six hundred seventy-eight rupees and ninety paise only' },
+    { description: 'Zero rupees', amount: 0, expected: 'Zero Rupees Only' },
+    { description: 'Single rupee', amount: 1, expected: 'One Rupee Only' },
+    { description: 'Single paise', amount: 0.01, expected: 'One Paise Only' },
+    { description: 'Ten paise', amount: 0.1, expected: 'Ten Paise Only' },
+    { description: 'Fifty Paise', amount: 0.5, expected: 'Fifty Paise Only' },
+    { description: 'Rupees without paise', amount: 1234, expected: 'One Thousand Two Hundred and Thirty-Four Rupees Only' },
+    { description: 'Rupees with paise', amount: 1234.56, expected: 'One Thousand Two Hundred Thirty-Four Rupees and Fifty-Six Paise Only' },
+    { description: 'Crore and lakh', amount: 12345678.9, expected: 'One Crore Twenty-Three Lakh Forty-Five Thousand Six Hundred Seventy-Eight Rupees and Ninety Paise Only' },
     { description: 'Negative amount', amount: -250.5, expected: 'Negative value not supported' },
-    { description: 'Large upper limit', amount: 100000000, expected: 'ten crore rupees only' },
+    { description: 'Large upper limit', amount: 100000000, expected: 'Ten Crore Rupees Only' },
     { description: 'Above limit throws error', amount: 100000001, expectError: true },
   ];
 
@@ -42,14 +44,16 @@ describe('Number to Word Conversion for USD', () => {
   }
 
   const testCases: TestCase[] = [
-    { description: 'Zero dollars', amount: 0, expected: 'zero dollars only' },
-    { description: 'Single dollar', amount: 1, expected: 'one dollar only' },
-    { description: 'Single cent', amount: 0.01, expected: 'one cent only' },
-    { description: 'Ten cents', amount: 0.1, expected: 'ten cents only' },
-    { description: 'Dollars with cents', amount: 1234.56, expected: 'one thousand two hundred thirty-four dollars and fifty-six cents only' },
-    { description: 'Millions', amount: 45000000, expected: 'forty-five million dollars only' },
+    { description: 'Zero dollars', amount: 0, expected: 'Zero Dollars Only' },
+    { description: 'Single dollar', amount: 1, expected: 'One Dollar Only' },
+    { description: 'Single cent', amount: 0.01, expected: 'One Cent Only' },
+    { description: 'Ten cents', amount: 0.1, expected: 'Ten Cents Only' },
+    { description: 'Fifty cents', amount: 0.5, expected: 'Fifty Cents Only' },
+    { description: 'Dollars without cents', amount: 1234, expected: 'One Thousand Two Hundred and Thirty-Four Dollars Only' },
+    { description: 'Dollars with cents', amount: 1234.56, expected: 'One Thousand Two Hundred Thirty-Four Dollars and Fifty-Six Cents Only' },
+    { description: 'Millions', amount: 45000000, expected: 'Forty-Five Million Dollars Only' },
     { description: 'Negative amount', amount: -250.5, expected: 'Negative value not supported' },
-    { description: 'Large upper limit', amount: 100000000, expected: 'one hundred million dollars only' },
+    { description: 'Large upper limit', amount: 100000000, expected: 'One Hundred Million Dollars Only' },
     { description: 'Above limit throws error', amount: 100000001, expectError: true },
   ];
 
