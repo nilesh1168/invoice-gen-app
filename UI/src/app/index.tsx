@@ -13,7 +13,8 @@ export default function index() {
         style={styles.image}
         resizeMode="contain"
       />
-      <Text style={styles.subtitle}>Invoicing, Simplified.</Text>
+      <Text style={styles.title}>InvoiceGen</Text>
+      <Text style={styles.subtitle}>Fast. Simple. Paperless.</Text>
 
       {/* Sign-in buttons */}
       <View style={styles.buttonContainer}>
