@@ -29,7 +29,7 @@ import { Currency } from "../../constants/currencies";
 import { useAuthContext } from "../../context/AuthContext";
 
 export default function CreateInvoiceScreen() {
-  const { user, loading, userDetails } = useAuthContext();
+  const { user, loading, userDetails, logout } = useAuthContext();
   const navigation = useNavigation();
   const {
     invoice,
@@ -91,6 +91,17 @@ export default function CreateInvoiceScreen() {
       [
         { text: "Continue Editing", style: "cancel" },
         { text: "Cancel Invoice", style: "destructive", onPress: resetInvoice },
+      ]
+    );
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Logout", style: "destructive", onPress: logout },
       ]
     );
   };
@@ -314,6 +325,12 @@ export default function CreateInvoiceScreen() {
 
         {/* Action Buttons */}
         <View style={styles.buttonContainer}>
+          <Button
+            title="Logout"
+            onPress={handleLogout}
+            variant="error"
+            style={styles.button}
+          />
           <Button
             title="Back"
             onPress={() => router.back()}

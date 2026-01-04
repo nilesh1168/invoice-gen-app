@@ -43,6 +43,9 @@ export default {
           backgroundColor: '#ffffff'
         }
       ]
-    ]
+    ],
+    extra:{
+      FIREBASE_SIGNIN_WEB_CLIENT_ID: process.env.FIREBASE_SIGNIN_WEB_CLIENT_ID
+    }
   }
 };
