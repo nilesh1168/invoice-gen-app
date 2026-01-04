@@ -1,22 +1,36 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, FlatList, Keyboard } from 'react-native';
-import { router } from 'expo-router';
-import { Colors } from '../../constants/colors';
-import { Button } from '../../components/ui/Button';
-import { TextInput } from '../../components/ui/TextInput';
-import { DatePicker } from '../../components/ui/DatePicker';
-import { LineItemInput } from '../../components/invoice/LineItemInput';
-import { useInvoice } from '../../hooks/useInvoice';
-import { useToast } from '../../hooks/useToast';
-import { validateInvoice } from '../../utils/validation';
-import { Toast } from '../../components/ui/Toast';
-import { LineItem } from '../../constants/types';
-import { Container } from '../../components/ui/Container';
-import { KeyboardAwareScrollView, KeyboardToolbar } from 'react-native-keyboard-controller';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Currency } from '../../constants/currencies';
+import React, { useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  FlatList,
+  Keyboard,
+} from "react-native";
+import { router } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import { Colors } from "../../constants/colors";
+import { Button } from "../../components/ui/Button";
+import { TextInput } from "../../components/ui/TextInput";
+import { DatePicker } from "../../components/ui/DatePicker";
+import { LineItemInput } from "../../components/invoice/LineItemInput";
+import { useInvoice } from "../../hooks/useInvoice";
+import { useToast } from "../../hooks/useToast";
+import { validateInvoice } from "../../utils/validation";
+import { Toast } from "../../components/ui/Toast";
+import { LineItem } from "../../constants/types";
+import { Container } from "../../components/ui/Container";
+import {
+  KeyboardAwareScrollView,
+  KeyboardToolbar,
+} from "react-native-keyboard-controller";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Currency } from "../../constants/currencies";
+import { useAuthContext } from "../../context/AuthContext";
 
 export default function CreateInvoiceScreen() {
+  const { user, loading, userDetails } = useAuthContext();
+  const navigation = useNavigation();
   const {
     invoice,
     updateInvoice,
@@ -30,6 +44,29 @@ export default function CreateInvoiceScreen() {
   const insets = useSafeAreaInsets();
   const { toasts, showToast, hideToast } = useToast();
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/");
+    }
+  }, [user, loading]);
+
+  // Prefill business information with user details
+  useEffect(() => {
+    if (userDetails && !invoice.businessInfo.uid) {
+      updateInvoice({
+        businessInfo: {
+          uid: userDetails.uid,
+          displayName: userDetails.displayName,
+          address: userDetails.address || "",
+          phoneNumber: userDetails.phoneNumber,
+          email: userDetails.email,
+          logo: userDetails.logo,
+        },
+      });
+    }
+  }, [userDetails]);
+
   useEffect(() => {
     recalculateInvoice();
   }, [invoice.lineItems, invoice.taxPercentage]);
@@ -37,23 +74,23 @@ export default function CreateInvoiceScreen() {
   const handlePreview = () => {
     const errors = validateInvoice(invoice);
     if (errors.length > 0) {
-      showToast(errors[0], 'error');
+      showToast(errors[0], "error");
       return;
     }
 
     router.push({
-      pathname: '/invoice/preview',
+      pathname: "/invoice/preview",
       params: { invoiceData: JSON.stringify(invoice) },
     });
   };
 
   const handleCancel = () => {
     Alert.alert(
-      'Cancel Invoice',
-      'Are you sure you want to cancel? All changes will be lost.',
+      "Cancel Invoice",
+      "Are you sure you want to cancel? All changes will be lost.",
       [
-        { text: 'Continue Editing', style: 'cancel' },
-        { text: 'Cancel Invoice', style: 'destructive', onPress: resetInvoice },
+        { text: "Continue Editing", style: "cancel" },
+        { text: "Cancel Invoice", style: "destructive", onPress: resetInvoice },
       ]
     );
   };
@@ -68,24 +105,45 @@ export default function CreateInvoiceScreen() {
   );
 
   const bottomOffset = insets.bottom + 62;
-  
+
+  if (loading) {
+    return (
+      <Container>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </Container>
+    );
+  }
+
   return (
     <>
       <Container>
         <FlatList
           data={invoice.lineItems}
           renderItem={renderLineItem}
-          renderScrollComponent={(props) => <KeyboardAwareScrollView bottomOffset={bottomOffset} {...props} />}
+          renderScrollComponent={(props) => (
+            <KeyboardAwareScrollView bottomOffset={bottomOffset} {...props} />
+          )}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Business Information</Text>
               <TextInput
                 label="Business Name"
-                value={invoice.businessInfo.name}
-                onChangeText={(text) => updateInvoice({
-                  businessInfo: { ...invoice.businessInfo, name: text }
-                })}
+                value={invoice.businessInfo.displayName}
+                onChangeText={(text) =>
+                  updateInvoice({
+                    businessInfo: {
+                      uid: invoice.businessInfo?.uid || "",
+                      logo: invoice.businessInfo?.logo || "",
+                      displayName: invoice.businessInfo?.displayName || "",
+                      email: text,
+                      phoneNumber: invoice.businessInfo?.phoneNumber,
+                      address: invoice.businessInfo?.address || "",
+                    },
+                  })
+                }
                 placeholder="Your business name"
                 style={styles.textInputStyle}
                 required
@@ -93,9 +151,18 @@ export default function CreateInvoiceScreen() {
               <TextInput
                 label="Address"
                 value={invoice.businessInfo.address}
-                onChangeText={(text) => updateInvoice({
-                  businessInfo: { ...invoice.businessInfo, address: text }
-                })}
+                onChangeText={(text) =>
+                  updateInvoice({
+                    businessInfo: {
+                      uid: invoice.businessInfo?.uid || "",
+                      logo: invoice.businessInfo?.logo || "",
+                      displayName: invoice.businessInfo?.displayName || "",
+                      email: text,
+                      phoneNumber: invoice.businessInfo?.phoneNumber,
+                      address: invoice.businessInfo?.address || "",
+                    },
+                  })
+                }
                 placeholder="Business address"
                 style={styles.textInputStyle}
                 multiline
@@ -105,20 +172,38 @@ export default function CreateInvoiceScreen() {
               <Text style={styles.sectionTitle}>Client Information</Text>
               <TextInput
                 label="Client Name"
-                value={invoice.client?.name || ''}
-                onChangeText={(text) => updateInvoice({
-                  client: { ...invoice.client, name: text, email: invoice.client?.email || '' }
-                })}
+                value={invoice.client?.displayName || ""}
+                onChangeText={(text) =>
+                  updateInvoice({
+                    client: {
+                      uid: invoice.client?.uid || "",
+                      logo: invoice.client?.logo || "",
+                      displayName: invoice.client?.displayName || "",
+                      email: text,
+                      phoneNumber: invoice.client?.phoneNumber,
+                      address: invoice.client?.address || "",
+                    },
+                  })
+                }
                 placeholder="Client name"
                 style={styles.textInputStyle}
                 required
               />
               <TextInput
                 label="Client Email"
-                value={invoice.client?.email || ''}
-                onChangeText={(text) => updateInvoice({
-                  client: { ...invoice.client, email: text, name: invoice.client?.name || '' }
-                })}
+                value={invoice.client?.email || ""}
+                onChangeText={(text) =>
+                  updateInvoice({
+                    client: {
+                      uid: invoice.client?.uid || "",
+                      logo: invoice.client?.logo || "",
+                      displayName: invoice.client?.displayName || "",
+                      email: text,
+                      phoneNumber: invoice.client?.phoneNumber,
+                      address: invoice.client?.address || "",
+                    },
+                  })
+                }
                 placeholder="client@example.com"
                 keyboardType="email-address"
                 style={styles.textInputStyle}
@@ -150,14 +235,14 @@ export default function CreateInvoiceScreen() {
                 <Text style={styles.currencyText}>Currency:</Text>
                 <Button
                   title="INR"
-                  onPress={() => updateInvoice({ currency: 'INR' })}
-                  variant={invoice.currency === 'INR' ? 'outline' : 'ghost'}
+                  onPress={() => updateInvoice({ currency: "INR" })}
+                  variant={invoice.currency === "INR" ? "outline" : "ghost"}
                   style={styles.currencyButton}
                 />
                 <Button
                   title="USD"
-                  onPress={() => updateInvoice({ currency: 'USD' })}
-                  variant={invoice.currency === 'USD' ? 'outline' : 'ghost'}
+                  onPress={() => updateInvoice({ currency: "USD" })}
+                  variant={invoice.currency === "USD" ? "outline" : "ghost"}
                   style={styles.currencyButton}
                 />
               </View>
@@ -180,7 +265,9 @@ export default function CreateInvoiceScreen() {
                 <TextInput
                   label="Tax Percentage"
                   value={invoice.taxPercentage.toString()}
-                  onChangeText={(text) => updateInvoice({ taxPercentage: Number(text) || 0 })}
+                  onChangeText={(text) =>
+                    updateInvoice({ taxPercentage: Number(text) || 0 })
+                  }
                   keyboardType="numeric"
                   placeholder="0"
                   style={styles.textInputStyle}
@@ -189,15 +276,24 @@ export default function CreateInvoiceScreen() {
                 <View style={styles.totalsContainer}>
                   <View style={styles.totalRow}>
                     <Text style={styles.totalLabel}>Subtotal:</Text>
-                    <Text style={styles.totalValue}>{Currency[invoice.currency]} {invoice.subtotal.toFixed(2)}</Text>
+                    <Text style={styles.totalValue}>
+                      {Currency[invoice.currency]} {invoice.subtotal.toFixed(2)}
+                    </Text>
                   </View>
                   <View style={styles.totalRow}>
-                    <Text style={styles.totalLabel}>Tax ({invoice.taxPercentage}%):</Text>
-                    <Text style={styles.totalValue}>{Currency[invoice.currency]} {invoice.taxAmount.toFixed(2)}</Text>
+                    <Text style={styles.totalLabel}>
+                      Tax ({invoice.taxPercentage}%):
+                    </Text>
+                    <Text style={styles.totalValue}>
+                      {Currency[invoice.currency]}{" "}
+                      {invoice.taxAmount.toFixed(2)}
+                    </Text>
                   </View>
                   <View style={[styles.totalRow, styles.finalTotal]}>
                     <Text style={styles.finalTotalLabel}>Total:</Text>
-                    <Text style={styles.finalTotalValue}>{Currency[invoice.currency]} {invoice.total.toFixed(2)}</Text>
+                    <Text style={styles.finalTotalValue}>
+                      {Currency[invoice.currency]} {invoice.total.toFixed(2)}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -222,6 +318,7 @@ export default function CreateInvoiceScreen() {
             title="Back"
             onPress={() => router.back()}
             variant="ghost"
+            disabled={!navigation.canGoBack()}
             style={styles.button}
           />
           <Button
@@ -241,23 +338,23 @@ export default function CreateInvoiceScreen() {
           <Toast key={toast.id} toast={toast} onHide={hideToast} />
         ))}
       </Container>
-      <KeyboardToolbar/>
+      <KeyboardToolbar />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  textInputStyle:{
+  textInputStyle: {
     backgroundColor: Colors.background,
   },
   currencyText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     color: Colors.textPrimary,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   currencyContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 20,
     marginBottom: 16,
   },
@@ -269,7 +366,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     color: Colors.textPrimary,
     marginBottom: 24,
   },
@@ -278,7 +375,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.textPrimary,
     marginBottom: 16,
   },
@@ -289,8 +386,8 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   totalLabel: {
@@ -299,7 +396,7 @@ const styles = StyleSheet.create({
   },
   totalValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     color: Colors.textPrimary,
   },
   finalTotal: {
@@ -310,16 +407,16 @@ const styles = StyleSheet.create({
   },
   finalTotalLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: Colors.textPrimary,
   },
   finalTotalValue: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: Colors.primary,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 16,
     gap: 8,
     borderTopWidth: 1,
@@ -334,5 +431,14 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginTop: 0,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: Colors.textSecondary,
   },
 });

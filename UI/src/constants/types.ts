@@ -6,18 +6,21 @@ export interface LineItem {
   total: number;
 }
 
-export interface Client {
-  name: string;
+export interface UserProfile {
+  uid: string;
+  displayName: string;
   email: string;
-  address?: string;
+  logo?: string;
+  phoneNumber?: string;
+  address: string;
 }
 
-export interface BusinessInfo {
-  name: string;
-  address: string;
-  phone?: string;
-  email?: string;
-  logo?: string;
+
+export interface Client extends UserProfile {
+
+}
+
+export interface BusinessInfo extends UserProfile {
 }
 
 export interface Invoice {
