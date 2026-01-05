@@ -53,6 +53,13 @@ const generateInvoiceHTML = (invoice: Invoice) => {
             ` : ''}
         </header>
 `
+    const renderFooter = () => `
+                <footer class="footer">
+            <div class="footer-content">
+              <span class="copyright">&copy; 2025</span>
+              <span class="company-name">InvoiceGen</span>
+            </div>
+          </footer>`
 
     const renderTableHeader = () => `
                 <thead>
@@ -97,7 +104,7 @@ const generateInvoiceHTML = (invoice: Invoice) => {
                 <span>Total Amount Due</span>
                 <span>${Currency[invoice.currency]}${invoice.total.toFixed(2)}</span>
               </div>
-              <div class="total-row">
+              <div class="total-row final-total"> 
                 <span>In Words:</span>
                 <span>${numberToCurrencyWords(invoice.total, invoice.currency)}</span>
               </div>
@@ -111,12 +118,7 @@ const generateInvoiceHTML = (invoice: Invoice) => {
               </div>` : ''}
             ` : ''}
     </main>
-            <footer class="footer">
-            <div class="footer-content">
-              <span class="copyright">&copy; 2025</span>
-              <span class="company-name">InvoiceGen</span>
-            </div>
-          </footer>
+    ${renderFooter()}
     </div>
 `;
     // Split line items into pages (estimate: 8 items per page for 600px)
@@ -158,6 +160,8 @@ const generateInvoiceHTML = (invoice: Invoice) => {
               <div class="total-row final-total">
                 <span>Total Amount Due</span>
                 <span>${Currency[invoice.currency]}${invoice.total.toFixed(2)}</span>
+              </div>
+              <div class="total-row final-total">  
                 <span>In Words:</span>
                 <span>${numberToCurrencyWords(invoice.total, invoice.currency)}</span>
               </div>
@@ -171,12 +175,7 @@ const generateInvoiceHTML = (invoice: Invoice) => {
               </div>` : ''}
           ` : ''}
         </main>
-        <footer class="footer">
-            <div class="footer-content">
-              <span class="copyright">&copy; 2025</span>
-              <span class="company-name">InvoiceGen</span>
-            </div>
-          </footer>
+        ${renderFooter()}
       </div>
     `;
     });
@@ -404,10 +403,10 @@ const generateInvoiceHTML = (invoice: Invoice) => {
         }
 
         .total-row.final-total {
-            font-size: 20px;
+            border-top: 3px solid #2C3E50;
+            font-size: 15px;
             font-weight: bold;
             color: #2C3E50;
-            border-top: 3px solid #2C3E50;
             padding-top: 15px;
             margin-top: 15px;
             text-transform: uppercase;
