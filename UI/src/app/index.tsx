@@ -1,24 +1,24 @@
 import React, { use, useEffect } from 'react';
 import { StyleSheet, Text, View, Image} from 'react-native';
 import { Colors } from '../constants/colors';
-import { Button } from '../components/ui/Button';
+import { Button } from '../components/ui';
 import { router } from 'expo-router';
 import { signInWithGoogle, configureGoogleSignIn, logout } from '../auth/googleAuth';
 import { useAuthContext } from '../context/AuthContext';
 
 
 export default function index() {
-  const { user, loading } = useAuthContext();
+  const {loading, userDetails } = useAuthContext();
 
   useEffect(() => {
     configureGoogleSignIn();
   }, []);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && userDetails?.uid) {
       router.replace('/invoice/create');
     }
-  }, [user, loading]);
+  }, [userDetails, loading]);
 
   if (loading) {
     return (
