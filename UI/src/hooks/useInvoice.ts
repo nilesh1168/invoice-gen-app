@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Invoice, LineItem} from '../constants/types';
 import { calculateLineItemTotal, calculateSubtotal, calculateTaxAmount, calculateTotal } from '../utils/calculations';
 
@@ -69,18 +69,21 @@ export const useInvoice = () => {
     }));
   };
 
-  const recalculateInvoice = () => {
-    const subtotal = calculateSubtotal(invoice.lineItems);
-    const taxAmount = calculateTaxAmount(subtotal, invoice.taxPercentage);
-    const total = calculateTotal(subtotal, taxAmount);
-    
-    setInvoice(prev => ({
-      ...prev,
-      subtotal,
-      taxAmount,
-      total,
-    }));
-  };
+  const recalculateInvoice = useCallback(() => {
+    // Derive totals from the latest state to avoid stale closures
+    setInvoice(prev => {
+      const subtotal = calculateSubtotal(prev.lineItems);
+      const taxAmount = calculateTaxAmount(subtotal, prev.taxPercentage);
+      const total = calculateTotal(subtotal, taxAmount);
+
+      return {
+        ...prev,
+        subtotal,
+        taxAmount,
+        total,
+      };
+    });
+  }, []);
 
   const resetInvoice = () => {
     setInvoice({

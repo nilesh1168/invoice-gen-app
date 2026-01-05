@@ -98,17 +98,12 @@ export default function CreateInvoiceScreen() {
     }
   }, [userDetails]);
 
-  // Memoize recalculateInvoice to prevent unnecessary effect triggers
-  const memoizedRecalculate = useCallback(() => {
-    recalculateInvoice();
-  }, [recalculateInvoice]);
-
   // Recalculate totals when line items or tax percentage changes
   useEffect(() => {
-    memoizedRecalculate();
-  }, []);
+    recalculateInvoice();
+  }, [invoice.lineItems, invoice.taxPercentage, recalculateInvoice]);
 
-  const handlePreview = () => {
+  const handlePreview = useCallback(() => {
     const errors = validateInvoice(invoice);
     if (errors.length > 0) {
       showToast(errors[0], "error");
@@ -119,9 +114,9 @@ export default function CreateInvoiceScreen() {
       pathname: "/invoice/preview",
       params: { invoiceData: JSON.stringify(invoice) },
     });
-  };
+  }, [invoice, showToast]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     Alert.alert(
       "Cancel Invoice",
       "Are you sure you want to cancel? All changes will be lost.",
@@ -130,9 +125,9 @@ export default function CreateInvoiceScreen() {
         { text: "Cancel Invoice", style: "destructive", onPress: resetInvoice },
       ]
     );
-  };
+  }, [resetInvoice]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     Alert.alert(
       "Logout",
       "Are you sure you want to logout?",
@@ -141,16 +136,16 @@ export default function CreateInvoiceScreen() {
         { text: "Logout", style: "destructive", onPress: logout },
       ]
     );
-  };
+  }, [logout]);
 
-  const renderLineItem = ({ item }: { item: LineItem }) => (
+  const renderLineItem = useCallback(({ item }: { item: LineItem }) => (
     <LineItemInput
       item={item}
       onUpdate={updateLineItem}
       onRemove={removeLineItem}
       currency={invoice.currency}
     />
-  );
+  ), [updateLineItem, removeLineItem, invoice.currency]);
 
   const bottomOffset = insets.bottom + 62;
 
