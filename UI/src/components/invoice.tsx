@@ -341,22 +341,40 @@ interface LineItemInputProps {
   currency: string;
 }
 
+const CHAR_LIMIT = 200;
+
 export const LineItemInput: React.FC<LineItemInputProps> = ({
   item,
   onRemove,
   onUpdate,
   currency,
 }) => {
+  const handleDescriptionChange = (text: string) => {
+    if (text.length <= CHAR_LIMIT) {
+      onUpdate(item.id, { description: text });
+    }
+  };
+
+  const characterCount = item.description.length;
+
   return (
     <View style={lineItemStyles.lineItem}>
-      <TextInput
-        label="Description"
-        value={item.description}
-        onChangeText={(text) => onUpdate(item.id, { description: text })}
-        placeholder="Item description"
-        style={lineItemStyles.textInputStyle}
-        required
-      />
+      <View style={lineItemStyles.descriptionContainer}>
+        <TextInput
+          label="Description"
+          value={item.description}
+          onChangeText={handleDescriptionChange}
+          placeholder="Item description"
+          style={lineItemStyles.textInputStyle}
+          required
+        />
+        <Text style={[
+          lineItemStyles.wordCount,
+          characterCount === CHAR_LIMIT && lineItemStyles.wordCountLimit
+        ]}>
+          {characterCount}/{CHAR_LIMIT}
+        </Text>
+      </View>
       <View style={lineItemStyles.row}>
         <TextInput
           label="Quantity"
@@ -394,6 +412,18 @@ export const LineItemInput: React.FC<LineItemInputProps> = ({
 const lineItemStyles = StyleSheet.create({
   textInputStyle: {
     backgroundColor: Colors.background,
+  },
+  descriptionContainer: {
+    position: "relative",
+  },
+  wordCount: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 4,
+    textAlign: "right",
+  },
+  wordCountLimit: {
+    color: Colors.error,
   },
   lineItem: {
     backgroundColor: Colors.surface,
