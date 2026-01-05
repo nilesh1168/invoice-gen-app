@@ -1,11 +1,11 @@
 import { Invoice } from "../constants/types";
 export const validateInvoice = (invoice: Invoice): string[] => {
   const errors: string[] = [];
-  if (!invoice.businessInfo.name) {
+  if (!invoice.businessInfo.displayName) {
     errors.push('Business name is required');
   }
   
-  if (!invoice.client?.name) {
+  if (!invoice.client?.displayName) {
     errors.push('Client is required');
   }
 

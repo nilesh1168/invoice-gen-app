@@ -5,8 +5,8 @@ describe('Invoice validation', () => {
   const validInvoice: Invoice = {
     id: '1',
     invoiceNumber: 'INV-001',
-    client: { name: 'John Doe', email: 'john@example.com', address: '123 Street' },
-    businessInfo: { name: 'My Business', address: '456 Avenue', phone: '1234567890' },
+    client: { uid: 'client1', displayName: 'John Doe', email: 'john@example.com', address: '123 Street' },
+    businessInfo: { uid: 'biz1', displayName: 'My Business', address: '456 Avenue', phoneNumber: '1234567890', email: 'business@example.com' },
     invoiceDate: new Date('2023-01-01'),
     dueDate: new Date('2023-01-10'),
     lineItems: [{ id: 'li1', description: 'Service A', quantity: 2, unitPrice: 100, total: 200 }],
@@ -36,8 +36,8 @@ describe('Invoice validation', () => {
       invoice: {
         id: '',
         invoiceNumber: '',
-        client: { name: '', email: '' },
-        businessInfo: { name: '', address: '' },
+        client: { uid: '', displayName: '', email: '', address: '' },
+        businessInfo: { uid: '', displayName: '', address: '', phoneNumber: '', email: '' },
         invoiceDate: null as any,
         dueDate: null as any,
         lineItems: [],
