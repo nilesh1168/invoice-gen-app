@@ -1,15 +1,7 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { useAuth } from '../hooks/useAuth';
 import { logout as firebaseLogout } from '../auth/googleAuth';
-import { BusinessInfo } from '../constants/types';
-
-interface AuthContextType {
-  user: FirebaseAuthTypes.User | null;
-  loading: boolean;
-  logout: () => Promise<void>;
-  userDetails: BusinessInfo | null;
-}
+import { BusinessInfo, AuthContextType } from '../constants/types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -22,7 +14,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
         displayName: user.displayName || '',
         email: user.email || '',
         phoneNumber: user.phoneNumber || undefined,
-        logo: user.photoURL || undefined,
+        logo: user.logo || undefined,
         address: '',
       }
     : null;
@@ -32,7 +24,6 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
   };
 
   const value: AuthContextType = {
-    user,
     loading,
     logout: handleLogout,
     userDetails,

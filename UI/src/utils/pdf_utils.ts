@@ -37,15 +37,15 @@ const generateInvoiceHTML = (invoice: Invoice) => {
                 <div class="bill-to-section">
                     <h4>Bill To</h4>
                     <div class="client-details">
-                        <div style="font-size: 24px; font-weight: 600; margin-bottom: 5px;">${invoice.client?.name}</div>
+                        <div style="font-size: 24px; font-weight: 600; margin-bottom: 5px;">${invoice.client?.displayName}</div>
                         <div>${invoice.client?.email}</div>
                     </div>
                 </div>
                 <div class="business-address-section">
                     <div class="business-address">
-                        <h4>${invoice.businessInfo.name}</h4>
+                        <h4>${invoice.businessInfo.displayName}</h4>
                         <div>${invoice.businessInfo.address}</div>
-                        <div>${invoice.businessInfo.phone}</div>
+                        ${invoice.businessInfo.phoneNumber ? `<div>${invoice.businessInfo.phoneNumber}</div>` : ''}
                         <div>${invoice.businessInfo.email}</div>
                     </div>
                 </div>

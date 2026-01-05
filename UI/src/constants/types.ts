@@ -1,3 +1,5 @@
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+
 export interface LineItem {
   id: string;
   description: string;
@@ -37,4 +39,10 @@ export interface Invoice {
   taxAmount: number;
   total: number;
   currency: string;
+}
+
+export interface AuthContextType {
+  loading: boolean;
+  logout: () => Promise<void>;
+  userDetails: BusinessInfo | null;
 }
