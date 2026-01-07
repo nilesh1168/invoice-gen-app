@@ -1,5 +1,5 @@
-import { calculateLineItemTotal, calculateSubtotal, calculateTaxAmount, calculateTotal } from "../src/utils/calculations";
-import { LineItem } from "../src/constants/types";
+import { LineItem } from "../../src/constants/types";
+import { calculateLineItemTotal, calculateSubtotal, calculateTaxAmount, calculateTotal } from "../../src/utils/calculations";
 
 describe('Line Item Calculation', () => {
   interface TestCase {

@@ -1,5 +1,5 @@
-import { validateInvoice } from '../src/utils/validation';
-import { Invoice } from '../src/constants/types';
+import { validateInvoice } from '../../src/utils/validation';
+import { Invoice } from '../../src/constants/types';
 
 describe('Invoice validation', () => {
   const validInvoice: Invoice = {
