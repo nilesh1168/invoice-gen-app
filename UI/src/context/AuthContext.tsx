@@ -1,6 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { logout as firebaseLogout } from '../auth/googleAuth';
 import { BusinessInfo, AuthContextType } from '../constants/types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +19,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
     : null;
 
   const handleLogout = async () => {
+    const { logout: firebaseLogout } = await import('../auth/googleAuth');
     await firebaseLogout();
   };
 
