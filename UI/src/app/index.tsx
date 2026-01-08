@@ -3,16 +3,12 @@ import { StyleSheet, Text, View, Image} from 'react-native';
 import { Colors } from '../constants/colors';
 import { Button } from '../components/ui';
 import { router } from 'expo-router';
-import { signInWithGoogle, configureGoogleSignIn, logout } from '../auth/googleAuth';
+import { signInWithGoogle } from '../auth/googleAuth';
 import { useAuthContext } from '../context/AuthContext';
 
 
 export default function index() {
   const {loading, userDetails } = useAuthContext();
-
-  useEffect(() => {
-    configureGoogleSignIn();
-  }, []);
 
   useEffect(() => {
     if (!loading && userDetails?.uid) {

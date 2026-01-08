@@ -4,7 +4,7 @@ import { Colors } from '../constants/colors';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthContextProvider } from '../context/AuthContext';
-
+import { configureGoogleSignIn } from '../auth/googleAuth';
 // keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -19,6 +19,7 @@ export default function RootLayout() {
     React.useEffect(() => {
     async function prepare() {
       try {
+        configureGoogleSignIn();
         // Add any initialization logic here
         // For example:
         // - Load fonts
@@ -34,7 +35,6 @@ export default function RootLayout() {
         setIsAppReady(true);
       }
     }
-
     prepare();
   }, []);
 
