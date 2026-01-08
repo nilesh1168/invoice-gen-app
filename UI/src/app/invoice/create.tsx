@@ -34,8 +34,8 @@ import {
 import { useInvoice } from "../../hooks/useInvoice";
 import { useToast } from "../../hooks/useToast";
 import { useAuthContext } from "../../context/AuthContext";
-
-// Utils
+import { useBusiness } from "../../hooks/useBusiness";
+import { useClient } from "../../hooks/useClient";
 import { validateInvoice } from "../../utils/validation";
 
 export default function CreateInvoiceScreen() {
@@ -50,30 +50,13 @@ export default function CreateInvoiceScreen() {
     recalculateInvoice,
     resetInvoice,
   } = useInvoice();
+  
+  const {business, updateBusiness } = useBusiness();
+
+  const {client, updateClient } = useClient();
 
   const insets = useSafeAreaInsets();
   const { toasts, showToast, hideToast } = useToast();
-
-  // Helper functions to reduce repetitive object reconstruction
-  const updateBusinessInfo = (updates: Partial<typeof invoice.businessInfo>) => {
-    updateInvoice({
-      businessInfo: {
-        ...invoice.businessInfo,
-        ...updates,
-      },
-    });
-  };
-
-  const updateClient = (updates: Partial<typeof invoice.client>) => {
-    if (invoice.client) {
-      updateInvoice({
-        client: {
-          ...invoice.client,
-          ...updates,
-        },
-      });
-    }
-  };
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -84,16 +67,12 @@ export default function CreateInvoiceScreen() {
 
   // Prefill business information with user details
   useEffect(() => {
-    if (userDetails && !invoice.businessInfo.uid && userDetails.uid) {
-      updateInvoice({
-        businessInfo: {
-          uid: userDetails.uid,
-          displayName: userDetails.displayName,
-          address: userDetails.address || "",
-          phoneNumber: userDetails.phoneNumber,
-          email: userDetails.email,
-          logo: userDetails.logo,
-        },
+    if (userDetails) {
+      updateBusiness({
+        uid: userDetails.uid,
+        displayName: userDetails.displayName,
+        email: userDetails.email,
+        businessLogo: userDetails.businessLogo,
       });
     }
   }, [userDetails]);
@@ -104,7 +83,7 @@ export default function CreateInvoiceScreen() {
   }, [invoice.lineItems, invoice.taxPercentage, recalculateInvoice]);
 
   const handlePreview = useCallback(() => {
-    const errors = validateInvoice(invoice);
+    const errors = validateInvoice(invoice, client, business);
     if (errors.length > 0) {
       showToast(errors[0], "error");
       return;
@@ -112,9 +91,9 @@ export default function CreateInvoiceScreen() {
 
     router.push({
       pathname: "/invoice/preview",
-      params: { invoiceData: JSON.stringify(invoice) },
+      params: { invoiceData: JSON.stringify(invoice), clientData: JSON.stringify(client), businessData: JSON.stringify(business) },
     });
-  }, [invoice, showToast]);
+  }, [invoice, client, business, showToast]);
 
   const handleCancel = useCallback(() => {
     Alert.alert(
@@ -172,15 +151,15 @@ export default function CreateInvoiceScreen() {
           ListHeaderComponent={
             <>
               <BusinessInfoSection
-                displayName={invoice.businessInfo.displayName}
-                address={invoice.businessInfo.address}
-                onUpdate={updateBusinessInfo}
+                displayName={business.displayName}
+                email={business.email}
+                onUpdate={(value) => updateBusiness(value)}
               />
 
               <ClientInfoSection
-                displayName={invoice.client?.displayName || ""}
-                email={invoice.client?.email || ""}
-                onUpdate={updateClient}
+                displayName={client.displayName}
+                email={client.email}
+                onUpdate={(value) => updateClient(value)}
               />
 
               <InvoiceDetailsSection

@@ -30,7 +30,7 @@ describe('Index Component - Authenticated Redirect', () => {
         uid: '123',
         displayName: 'Test User',
         email: 'test@example.com',
-        address: '',
+        businessLogo: '',
       },
       logout: jest.fn(),
     });

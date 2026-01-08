@@ -24,13 +24,13 @@ import {
 
 interface BusinessInfoSectionProps {
   displayName: string;
-  address: string;
-  onUpdate: (updates: { displayName?: string; address?: string }) => void;
+  email: string;
+  onUpdate: (updates: { displayName?: string; email?: string }) => void;
 }
 
 export const BusinessInfoSection: React.FC<BusinessInfoSectionProps> = ({
   displayName,
-  address,
+  email,
   onUpdate,
 }) => {
   return (
@@ -45,10 +45,10 @@ export const BusinessInfoSection: React.FC<BusinessInfoSectionProps> = ({
         required
       />
       <TextInput
-        label="Address"
-        value={address}
-        onChangeText={(text) => onUpdate({ address: text })}
-        placeholder="Business address"
+        label="Email"
+        value={email}
+        onChangeText={(text) => onUpdate({ email: text })}
+        placeholder="Business email"
         style={businessStyles.textInputStyle}
         multiline
         numberOfLines={3}

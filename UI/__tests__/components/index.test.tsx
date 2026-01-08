@@ -77,7 +77,7 @@ describe('Index Component - Loading State', () => {
     // Arrange
     mockUseAuthContext.mockReturnValue({
       loading: true,
-      userDetails: { uid: '123', displayName: 'Test User', email: 'test@example.com', address: '' },
+      userDetails: { uid: '123', displayName: 'Test User', email: 'test@example.com', businessLogo: '' },
       logout: jest.fn(),
     });
 

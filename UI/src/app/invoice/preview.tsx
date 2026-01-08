@@ -11,18 +11,19 @@ import { generateInvoiceHTML } from '../../utils/pdf_utils';
 const { width } = Dimensions.get('window');
 
 export default function PreviewInvoiceScreen() {
-  const { invoiceData } = useLocalSearchParams();
+  const { invoiceData, clientData, businessData } = useLocalSearchParams();
   const { toasts, showToast, hideToast } = useToast();
 
   const invoice: Invoice = JSON.parse(invoiceData as string);
-
+  const client = JSON.parse(clientData as string);
+  const business = JSON.parse(businessData as string);
   const handleSend = async () => {
     // TODO: Implement email sending functionality
   };
 
   // Handle PDF generation and sharing
   const handleDownload = async () => {
-    const htmlContent = generateInvoiceHTML(invoice)
+    const htmlContent = generateInvoiceHTML(invoice, client, business);
 
     try {
       const { uri } = await printToFileAsync({ html: htmlContent, base64: false });
@@ -47,7 +48,7 @@ export default function PreviewInvoiceScreen() {
     <Container>
       <WebView
         originWhitelist={['*']}
-        source={{ html: generateInvoiceHTML(invoice) }}
+        source={{ html: generateInvoiceHTML(invoice, client, business) }}
         style={{ flex: 1, backgroundColor: '#fff' }}
         automaticallyAdjustContentInsets={false}
         scalesPageToFit={true}

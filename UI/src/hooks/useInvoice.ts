@@ -5,20 +5,7 @@ import { calculateLineItemTotal, calculateSubtotal, calculateTaxAmount, calculat
 export const useInvoice = () => {
   const [invoice, setInvoice] = useState<Invoice>({
     id: Date.now().toString(),
-    invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
-    client: {
-      uid: '',
-      displayName: '',
-      email: '',
-      address: '',
-    },
-    businessInfo: {
-      uid: '',
-      displayName: '',
-      address: '',
-      phoneNumber: '',
-      email: '',
-    },
+    invoiceNumber: `INV-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
     invoiceDate: new Date(),
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
     lineItems: [],
@@ -88,15 +75,7 @@ export const useInvoice = () => {
   const resetInvoice = () => {
     setInvoice({
       id: Date.now().toString(),
-      invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
-      client: null,
-      businessInfo: {
-        uid: '',
-        displayName: '',
-        address: '',
-        phoneNumber: '',
-        email: '',
-      },
+      invoiceNumber: `INV-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
       invoiceDate: new Date(),
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       lineItems: [],

@@ -1,20 +1,18 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { BusinessInfo, AuthContextType } from '../constants/types';
+import { Business, AuthContextType } from '../constants/types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthContextProvider({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
 
-  const userDetails: BusinessInfo | null = user
+  const userDetails: Business | null = user
     ? {
         uid: user.uid,
         displayName: user.displayName || '',
         email: user.email || '',
-        phoneNumber: user.phoneNumber || undefined,
-        logo: user.logo || undefined,
-        address: '',
+        businessLogo: user.businessLogo || '',
       }
     : null;
 
