@@ -43,6 +43,11 @@ export default {
           backgroundColor: '#ffffff'
         }
       ]
-    ]
+    ],
+    extra:{
+    eas:{
+      projectId: "26497e5e-0d1b-4fe6-81f3-bdaa7903c492"
+    }
+  }
   }
 };
