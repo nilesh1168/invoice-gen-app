@@ -43,6 +43,7 @@
     "typescript": "~5.8.3",
 
     "@types/react": "~19.0.10",
+    "expo-dev-client": "~5.2.4",
     "@types/jest": "^29.5.14",
 
     "jest": "~29.7.0",
