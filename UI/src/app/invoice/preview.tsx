@@ -1,30 +1,29 @@
 import { View, StyleSheet, Alert, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Colors } from '../../constants/colors';
-import { Button } from '../../components/ui/Button';
+import { Container, Button, Toast } from '../../components/ui';
 import { Invoice } from '../../constants/types';
 import { useToast } from '../../hooks/useToast';
-import { Toast } from '../../components/ui/Toast';
 import { printToFileAsync } from 'expo-print';
 import { isAvailableAsync, shareAsync } from 'expo-sharing';
 import { WebView } from 'react-native-webview';
 import { generateInvoiceHTML } from '../../utils/pdf_utils';
-import { Container } from '../../components/ui/Container';
 const { width } = Dimensions.get('window');
 
 export default function PreviewInvoiceScreen() {
-  const { invoiceData } = useLocalSearchParams();
+  const { invoiceData, clientData, businessData } = useLocalSearchParams();
   const { toasts, showToast, hideToast } = useToast();
 
   const invoice: Invoice = JSON.parse(invoiceData as string);
-
+  const client = JSON.parse(clientData as string);
+  const business = JSON.parse(businessData as string);
   const handleSend = async () => {
     // TODO: Implement email sending functionality
   };
 
   // Handle PDF generation and sharing
   const handleDownload = async () => {
-    const htmlContent = generateInvoiceHTML(invoice)
+    const htmlContent = generateInvoiceHTML(invoice, client, business);
 
     try {
       const { uri } = await printToFileAsync({ html: htmlContent, base64: false });
@@ -49,7 +48,7 @@ export default function PreviewInvoiceScreen() {
     <Container>
       <WebView
         originWhitelist={['*']}
-        source={{ html: generateInvoiceHTML(invoice) }}
+        source={{ html: generateInvoiceHTML(invoice, client, business) }}
         style={{ flex: 1, backgroundColor: '#fff' }}
         automaticallyAdjustContentInsets={false}
         scalesPageToFit={true}

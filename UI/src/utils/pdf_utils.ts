@@ -1,5 +1,5 @@
 import { printToFileAsync } from "expo-print";
-import { Invoice } from "../constants/types";
+import { Client, Business, Invoice } from "../constants/types";
 import { Alert } from "react-native";
 import { Currency } from "../constants/currencies";
 import { numberToCurrencyWords } from "./numberToWord";
@@ -14,7 +14,7 @@ const formatDate = (date: Date | string): string => {
     });
 };
 
-const generateInvoiceHTML = (invoice: Invoice) => {
+const generateInvoiceHTML = (invoice: Invoice, client: Client, business: Business) => {
     // business detaails only on first page not on others
     const renderHeader = (showBillingSection: boolean = true) => `
 <!-- Header Component -->
@@ -37,22 +37,27 @@ const generateInvoiceHTML = (invoice: Invoice) => {
                 <div class="bill-to-section">
                     <h4>Bill To</h4>
                     <div class="client-details">
-                        <div style="font-size: 24px; font-weight: 600; margin-bottom: 5px;">${invoice.client?.name}</div>
-                        <div>${invoice.client?.email}</div>
+                        <div style="font-size: 24px; font-weight: 600; margin-bottom: 5px;">${client.displayName}</div>
+                        <div>${client.email}</div>
                     </div>
                 </div>
                 <div class="business-address-section">
                     <div class="business-address">
-                        <h4>${invoice.businessInfo.name}</h4>
-                        <div>${invoice.businessInfo.address}</div>
-                        <div>${invoice.businessInfo.phone}</div>
-                        <div>${invoice.businessInfo.email}</div>
+                        <h4>${business.displayName}</h4>
+                        <div>${business.email}</div>
                     </div>
                 </div>
             </div>
             ` : ''}
         </header>
 `
+    const renderFooter = () => `
+                <footer class="footer">
+            <div class="footer-content">
+              <span class="copyright">&copy; 2025</span>
+              <span class="company-name">InvoiceGen</span>
+            </div>
+          </footer>`
 
     const renderTableHeader = () => `
                 <thead>
@@ -97,7 +102,7 @@ const generateInvoiceHTML = (invoice: Invoice) => {
                 <span>Total Amount Due</span>
                 <span>${Currency[invoice.currency]}${invoice.total.toFixed(2)}</span>
               </div>
-              <div class="total-row">
+              <div class="total-row final-total"> 
                 <span>In Words:</span>
                 <span>${numberToCurrencyWords(invoice.total, invoice.currency)}</span>
               </div>
@@ -111,12 +116,7 @@ const generateInvoiceHTML = (invoice: Invoice) => {
               </div>` : ''}
             ` : ''}
     </main>
-            <footer class="footer">
-            <div class="footer-content">
-              <span class="copyright">&copy; 2025</span>
-              <span class="company-name">InvoiceGen</span>
-            </div>
-          </footer>
+    ${renderFooter()}
     </div>
 `;
     // Split line items into pages (estimate: 8 items per page for 600px)
@@ -158,6 +158,8 @@ const generateInvoiceHTML = (invoice: Invoice) => {
               <div class="total-row final-total">
                 <span>Total Amount Due</span>
                 <span>${Currency[invoice.currency]}${invoice.total.toFixed(2)}</span>
+              </div>
+              <div class="total-row final-total">  
                 <span>In Words:</span>
                 <span>${numberToCurrencyWords(invoice.total, invoice.currency)}</span>
               </div>
@@ -171,12 +173,7 @@ const generateInvoiceHTML = (invoice: Invoice) => {
               </div>` : ''}
           ` : ''}
         </main>
-        <footer class="footer">
-            <div class="footer-content">
-              <span class="copyright">&copy; 2025</span>
-              <span class="company-name">InvoiceGen</span>
-            </div>
-          </footer>
+        ${renderFooter()}
       </div>
     `;
     });
@@ -404,10 +401,10 @@ const generateInvoiceHTML = (invoice: Invoice) => {
         }
 
         .total-row.final-total {
-            font-size: 20px;
+            border-top: 3px solid #2C3E50;
+            font-size: 15px;
             font-weight: bold;
             color: #2C3E50;
-            border-top: 3px solid #2C3E50;
             padding-top: 15px;
             margin-top: 15px;
             text-transform: uppercase;
@@ -526,8 +523,8 @@ const generateInvoiceHTML = (invoice: Invoice) => {
 };
 
 
-const generatePdf = async (invoice: Invoice) => {
-    const htmlContent = generateInvoiceHTML(invoice);
+const generatePdf = async (invoice: Invoice, client: Client, business: Business) => {
+    const htmlContent = generateInvoiceHTML(invoice, client, business);
     let uri;
     try {
         uri = await printToFileAsync({ html: htmlContent, base64: false, margins: { top: 30, bottom: 30, left: 10, right: 10 } });

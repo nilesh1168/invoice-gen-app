@@ -6,25 +6,24 @@ export interface LineItem {
   total: number;
 }
 
-export interface Client {
-  name: string;
+export interface UserProfile {
+  uid: string;
+  displayName: string;
   email: string;
-  address?: string;
 }
 
-export interface BusinessInfo {
-  name: string;
-  address: string;
-  phone?: string;
-  email?: string;
-  logo?: string;
+
+export interface Client extends UserProfile {
+
+}
+
+export interface Business extends UserProfile {
+  businessLogo: string;
 }
 
 export interface Invoice {
   id: string;
   invoiceNumber: string;
-  client: Client | null;
-  businessInfo: BusinessInfo;
   invoiceDate: Date;
   dueDate: Date;
   lineItems: LineItem[];
@@ -34,4 +33,10 @@ export interface Invoice {
   taxAmount: number;
   total: number;
   currency: string;
+}
+
+export interface AuthContextType {
+  loading: boolean;
+  logout: () => Promise<void>;
+  userDetails: Business | null;
 }

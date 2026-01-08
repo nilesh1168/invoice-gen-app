@@ -43,6 +43,12 @@ export default {
           backgroundColor: '#ffffff'
         }
       ]
-    ]
+    ],
+    extra:{
+      FIREBASE_SIGNIN_WEB_CLIENT_ID: process.env.FIREBASE_SIGNIN_WEB_CLIENT_ID,
+      eas:{
+        projectId: "26497e5e-0d1b-4fe6-81f3-bdaa7903c492"
+      }
+    }
   }
 };

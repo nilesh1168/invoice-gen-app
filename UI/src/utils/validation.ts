@@ -1,23 +1,27 @@
-import { Invoice } from "../constants/types";
-export const validateInvoice = (invoice: Invoice): string[] => {
+import { Client, Invoice, Business } from "../constants/types";
+export const validateInvoice = (invoice: Invoice, client: Client, business: Business): string[] => {
   const errors: string[] = [];
-  if (!invoice.businessInfo.name) {
+  if (!business.displayName) {
     errors.push('Business name is required');
   }
   
-  if (!invoice.client?.name) {
+  if (!client.displayName) {
     errors.push('Client is required');
   }
 
-  if (!invoice.client?.email) {
+  if (!client.email) {
     errors.push('Client email is required');
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (invoice.client?.email && !emailRegex.test(invoice.client.email)) {
+  if (client.email && !emailRegex.test(client.email)) {
     errors.push('Client email is invalid');
   }
   
+    if (business.email && !emailRegex.test(business.email)) {
+    errors.push('Business email is invalid');
+  }
+
   if (!invoice.invoiceNumber) {
     errors.push('Invoice number is required');
   }

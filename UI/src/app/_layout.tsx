@@ -3,7 +3,8 @@ import { Stack } from 'expo-router';
 import { Colors } from '../constants/colors';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import * as SplashScreen from 'expo-splash-screen';
-
+import { AuthContextProvider } from '../context/AuthContext';
+import { configureGoogleSignIn } from '../auth/googleAuth';
 // keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
@@ -18,6 +19,7 @@ export default function RootLayout() {
     React.useEffect(() => {
     async function prepare() {
       try {
+        configureGoogleSignIn();
         // Add any initialization logic here
         // For example:
         // - Load fonts
@@ -33,7 +35,6 @@ export default function RootLayout() {
         setIsAppReady(true);
       }
     }
-
     prepare();
   }, []);
 
@@ -49,40 +50,42 @@ export default function RootLayout() {
   }
   
   return (
-    <KeyboardProvider>
-      <Stack
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: Colors.surface,
-          },
-          headerTintColor: Colors.textPrimary,
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
-        }}
-      >
-        <Stack.Screen 
-          name="index" 
-          options={{ 
-            title: 'Home',
-            headerShown: false,
-          }} 
-        />
-        <Stack.Screen 
-          name="invoice/create" 
-          options={{ 
-            title: 'Create Invoice',
-            headerShown: false,
-          }} 
-        />
-        <Stack.Screen 
-          name="invoice/preview" 
-          options={{ 
-            title: 'Preview Invoice',
-            headerShown: false,
-          }} 
-        />
-      </Stack>
-    </KeyboardProvider>
+    <AuthContextProvider>
+      <KeyboardProvider>
+        <Stack
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: Colors.surface,
+            },
+            headerTintColor: Colors.textPrimary,
+            headerTitleStyle: {
+              fontWeight: '600',
+            },
+          }}
+        >
+          <Stack.Screen 
+            name="index" 
+            options={{ 
+              title: 'Home',
+              headerShown: false,
+            }} 
+          />
+          <Stack.Screen 
+            name="invoice/create" 
+            options={{ 
+              title: 'Create Invoice',
+              headerShown: false,
+            }} 
+          />
+          <Stack.Screen 
+            name="invoice/preview" 
+            options={{ 
+              title: 'Preview Invoice',
+              headerShown: false,
+            }} 
+          />
+        </Stack>
+      </KeyboardProvider>
+    </AuthContextProvider>
   );  
 }

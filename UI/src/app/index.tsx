@@ -1,10 +1,29 @@
-import React from 'react';
+import React, { use, useEffect } from 'react';
 import { StyleSheet, Text, View, Image} from 'react-native';
 import { Colors } from '../constants/colors';
-import { Button } from '../components/ui/Button';
+import { Button } from '../components/ui';
 import { router } from 'expo-router';
+import { signInWithGoogle } from '../auth/googleAuth';
+import { useAuthContext } from '../context/AuthContext';
+
 
 export default function index() {
+  const {loading, userDetails } = useAuthContext();
+
+  useEffect(() => {
+    if (!loading && userDetails?.uid) {
+      router.replace('/invoice/create');
+    }
+  }, [userDetails, loading]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Image in the center */}
@@ -16,11 +35,17 @@ export default function index() {
       <Text style={styles.title}>InvoiceGen</Text>
       <Text style={styles.subtitle}>Fast. Simple. Paperless.</Text>
 
-      {/* Sign-in buttons */}
       <View style={styles.buttonContainer}>
         <Button
-          title="Get Started"
-          onPress={() => {router.push('/invoice/create')}}
+          title="Sign In with Google"
+          onPress={async () => {
+          try {
+            await signInWithGoogle();
+            router.replace('/invoice/create');
+          } catch (e) {
+            console.error(e);
+          }
+        }}
           variant="outline"
           style={styles.button}
         />

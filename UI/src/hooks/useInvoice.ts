@@ -1,21 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Invoice, LineItem} from '../constants/types';
 import { calculateLineItemTotal, calculateSubtotal, calculateTaxAmount, calculateTotal } from '../utils/calculations';
 
 export const useInvoice = () => {
   const [invoice, setInvoice] = useState<Invoice>({
     id: Date.now().toString(),
-    invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
-    client: {
-      name: '',
-      email: '',
-    },
-    businessInfo: {
-      name: '',
-      address: '',
-      phone: '',
-      email: '',
-    },
+    invoiceNumber: `INV-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
     invoiceDate: new Date(),
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
     lineItems: [],
@@ -66,30 +56,26 @@ export const useInvoice = () => {
     }));
   };
 
-  const recalculateInvoice = () => {
-    const subtotal = calculateSubtotal(invoice.lineItems);
-    const taxAmount = calculateTaxAmount(subtotal, invoice.taxPercentage);
-    const total = calculateTotal(subtotal, taxAmount);
-    
-    setInvoice(prev => ({
-      ...prev,
-      subtotal,
-      taxAmount,
-      total,
-    }));
-  };
+  const recalculateInvoice = useCallback(() => {
+    // Derive totals from the latest state to avoid stale closures
+    setInvoice(prev => {
+      const subtotal = calculateSubtotal(prev.lineItems);
+      const taxAmount = calculateTaxAmount(subtotal, prev.taxPercentage);
+      const total = calculateTotal(subtotal, taxAmount);
+
+      return {
+        ...prev,
+        subtotal,
+        taxAmount,
+        total,
+      };
+    });
+  }, []);
 
   const resetInvoice = () => {
     setInvoice({
       id: Date.now().toString(),
-      invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
-      client: null,
-      businessInfo: {
-        name: '',
-        address: '',
-        phone: '',
-        email: '',
-      },
+      invoiceNumber: `INV-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
       invoiceDate: new Date(),
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       lineItems: [],

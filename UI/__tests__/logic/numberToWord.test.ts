@@ -1,4 +1,4 @@
-import { numberToCurrencyWords } from '../src/utils/numberToWord';
+import { numberToCurrencyWords } from '../../src/utils/numberToWord';
 
 describe('Number to Word Conversion for INR', () => {
   interface TestCase {
